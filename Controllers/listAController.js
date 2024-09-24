@@ -25,10 +25,11 @@ exports.addToListA = async (req, res) => {
 };
 
 exports.getAllListA = async (req, res) => {
-  try {
-    const listAEntries = await ListA.find({});
-    res.status(200).json(listAEntries);
-  } catch (error) {
-    res.status(500).json({ error: 'Error fetching List A' });
-  }
-};
+    try {
+      const listAEntries = await ListA.find({}, 'newsletterName niche'); // Only select the fields needed
+      res.status(200).json(listAEntries);
+    } catch (error) {
+      res.status(500).json({ error: 'Error fetching List A' });
+    }
+  };
+  
