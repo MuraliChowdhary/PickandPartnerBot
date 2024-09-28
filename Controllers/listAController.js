@@ -32,4 +32,31 @@ exports.getAllListA = async (req, res) => {
       res.status(500).json({ error: 'Error fetching List A' });
     }
   };
-  
+
+ 
+
+
+
+  exports.getLink = async(req,res)=>{
+    const id = req.query.creatorId;
+    console.log(id)
+    try{
+      const creator = await ListA.findById(id);
+      if (!creator) {
+          return res.status(404).json({ message: 'Creator not found' });
+      }
+      
+      let creatorLink = creator.link; 
+      
+      if (!creatorLink.startsWith("https://")) {
+          creatorLink = "https://" + creatorLink;  
+      }
+      
+      res.status(200).json(creatorLink);
+      
+    }
+    catch(err){
+
+        res.status(500).json({error:'Error fetching link'});
+    }
+  }
