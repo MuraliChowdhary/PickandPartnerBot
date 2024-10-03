@@ -6,7 +6,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 
-// Importing routes  
+// Importing routes
 const listARoutes = require("../Routes/listARoutes");
 const listBRoutes = require("../Routes/listBRoutes");
 const utmRoutes = require("../Routes/utmRoutes");
@@ -64,6 +64,9 @@ const client = new Client({
   partials: [Partials.Message, Partials.Channel, Partials.Reaction],
 });
 
+ 
+
+
 const commands = [
   {
     name: "cross-promote",
@@ -109,6 +112,29 @@ const rest = new REST({ version: "9" }).setToken(
 client.once("ready", () => {
   console.log("Bot is online!");
 });
+
+client.on("guildCreate", async (guild) => {
+  console.log(`Bot added to a new server: ${guild.name}`);
+
+  // Try to find the existing 'general' channel
+  const generalChannel = guild.channels.cache.find(
+    (channel) => channel.name === "general" && channel.type === 0 // GUILD_TEXT
+  );
+
+  // If the general channel exists, send a welcome message
+  if (generalChannel) {
+    generalChannel.send(
+      `Welcome to the Pick and Partner community,  🎉\n` +
+      `Here, you can connect, collaborate, and cross-promote your newsletter with a diverse group of creators.\n` +
+      `Before you join, please tell us more about yourself so we can find the perfect match for you.\n` +
+      `#guidelines`
+    );
+  } else {
+    console.log(`No general channel found in ${guild.name}.`);
+  }
+});
+
+
 
 // Handle interactions
 client.on("interactionCreate", async (interaction) => {
@@ -221,8 +247,13 @@ async function handleCrossPromote(interaction) {
 
     await interaction.reply({
       content: `Here are the available creators:\n${creators
-        .map((creator, index) => `${index + 1}. ${creator.newsletterName} - ${creator.niche}`)
-        .join("\n")}\n\nPlease type the number of the creator you want to promote or collaborate with.`,
+        .map(
+          (creator, index) =>
+            `${index + 1}. ${creator.newsletterName} - ${creator.niche}`
+        )
+        .join(
+          "\n"
+        )}\n\nPlease type the number of the creator you want to promote or collaborate with.`,
       ephemeral: true, // Optional: keep it private to the user
     });
 
@@ -236,16 +267,20 @@ async function handleCrossPromote(interaction) {
     collector.on("collect", async (collected) => {
       const creatorIndex = parseInt(collected.content.trim(), 10) - 1;
 
-      if (isNaN(creatorIndex) || creatorIndex < 0 || creatorIndex >= creators.length) {
+      if (
+        isNaN(creatorIndex) ||
+        creatorIndex < 0 ||
+        creatorIndex >= creators.length
+      ) {
         await interaction.followUp("Invalid number. Please try again.");
         return;
       }
 
       const selectedCreator = creators[creatorIndex];
       const creatorId = selectedCreator._id; // Get the creator's ID
-        console.log(creatorId)
+      console.log(creatorId);
       // Proceed to send creatorId to the backend
-      await handleCollaborate(interaction, creatorId); 
+      await handleCollaborate(interaction, creatorId);
       collector.stop(); // Stop collecting once valid selection is made
     });
 
@@ -256,36 +291,41 @@ async function handleCrossPromote(interaction) {
     });
   } catch (error) {
     console.error("Error fetching creators:", error);
-    await interaction.reply("Failed to fetch creators. Please try again later.");
+    await interaction.reply(
+      "Failed to fetch creators. Please try again later."
+    );
   }
 }
 
 // Handle the collaborate command and fetch the UTM link
 async function handleCollaborate(interaction, creatorId) {
   try {
-    const response = await fetch(`http://localhost:3030/api/link?creatorId=${creatorId}`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    });
+    const response = await fetch(
+      `http://localhost:3030/api/link?creatorId=${creatorId}`,
+      {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
 
     if (!response.ok) {
       await interaction.reply("Failed to fetch the link. Please try again.");
       return;
     }
-  
+
     const data = await response.text();
-    console.log(data)
-    const dataurl = data.replace(/"/g, '');
-    console.log(dataurl)
- 
-    const utmLink = `${dataurl}/signup?utm_source=${interaction.user.id}&utm_medium=murali&utm_campaign=cross_promotion`
+    console.log(data);
+    const dataurl = data.replace(/"/g, "");
+    console.log(dataurl);
 
-
+    const utmLink = `${dataurl}/signup?utm_source=${interaction.user.id}&utm_medium=murali&utm_campaign=cross_promotion`;
 
     await interaction.followUp(`Here is your UTM link: ${utmLink}`);
   } catch (error) {
     console.error("Error during collaboration:", error);
-    await interaction.reply("Failed to generate a UTM link. Please try again later.");
+    await interaction.reply(
+      "Failed to generate a UTM link. Please try again later."
+    );
   }
 }
-client.login(process.env.DISCORDJS_BOT_TOKEN); 
+client.login(process.env.DISCORDJS_BOT_TOKEN);
