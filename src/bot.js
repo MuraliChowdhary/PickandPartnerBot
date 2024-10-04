@@ -1,6 +1,6 @@
 require("dotenv").config();
 const fetch = (...args) =>
-  import("node-fetch").then(({ default: fetch }) => fetch(...args));
+import("node-fetch").then(({ default: fetch }) => fetch(...args));
 
 const express = require("express");
 const mongoose = require("mongoose");
@@ -10,7 +10,12 @@ const cors = require("cors");
 const listARoutes = require("../Routes/listARoutes");
 const listBRoutes = require("../Routes/listBRoutes");
 const utmRoutes = require("../Routes/utmRoutes");
-
+const AdminRoutes = require("../Routes/AdminRoutes")
+const ADMIN_USER_ID = process.env.ADMIN_USER_ID
+const API  ="http://localhost:3030/api/admin"
+const WEBHOOK_URL = process.env.USER_NOTIFIER
+const REGISTRATION_NOTIFIER = process.env.REGISTRATION_NOTIFIER
+ 
 // Set up Express app
 const app = express();
 app.use(cors());
@@ -19,8 +24,8 @@ app.use(express.json());
 // MongoDB connection
 mongoose
   .connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
+    // useNewUrlParser: true,
+    // useUnifiedTopology: true,
   })
   .then(() => {
     console.log("Database Connected Successfully");
@@ -30,6 +35,7 @@ mongoose
   });
 
 // API routes
+app.use("/api/admin",AdminRoutes)
 app.use("/api/", listARoutes);
 // app.use("/api/", listBRoutes);
 app.use("/api/utm", utmRoutes);
@@ -103,6 +109,61 @@ client.once("ready", () => {
   console.log("Bot is online!");
 });
 
+// client.on('guildMemberAdd', member => {
+//   const newUserTag = member.user.tag;
+//   console.log(`New user joined: ${newUserTag}`);
+ 
+//   fetch(API, {
+//       method: 'POST',
+//       headers: { 'Content-Type': 'application/json' },
+//       body: JSON.stringify({
+//           webhookUrl: process.env.USER_NOTIFIER, // The webhook URL, set as an environment variable
+//           message: `New user joined: ${newUserTag}`
+//       })
+//   })
+//   .then(res => res.json())
+//   .then(json => console.log('Webhook response:', json))
+//   .catch(err => console.error('Error sending request to API:', err));
+// });
+ 
+client.on('guildCreate', (guild) => {
+    const guildName = guild.name;
+    const guildId = guild.id;
+
+    console.log(`Bot added to a new server: ${guildName} (ID: ${guildId})`);
+
+    // Create the message to be sent to the admin
+    const message = `The bot has been added to a new server: **${guildName}** (ID: ${guildId})`;
+
+    // Send a POST request to the webhook URL
+    fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            content: message // The message you want to send to the Discord channel
+        })
+    })
+    .then(response => {
+        // Check if the response is OK
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json(); // Only parse the response if it's OK
+    })
+    .then(data => {
+        console.log('Webhook successfully triggered:', data);
+    })
+    .catch(error => {
+        console.error('Error triggering webhook:', error.message); // Log the error message
+    });
+});
+
+
+
+
+
 client.on("guildCreate", async (guild) => {
   console.log(`Bot added to a new server: ${guild.name}`);
 
@@ -125,8 +186,7 @@ client.on("guildCreate", async (guild) => {
 });
 
 
-
-// Handle interactions
+ 
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isCommand()) return;
 
@@ -203,6 +263,16 @@ async function handleRegister(interaction) {
               ),
             ],
           });
+          await fetch(REGISTRATION_NOTIFIER, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              content: `New registration:\n**Discord ID:** ${newsletterData.discordId}\n**Newsletter Name:** ${newsletterData.newsletterName}\n**Niche:** ${newsletterData.niche}\n**Subscribers:** ${newsletterData.subscribers}\n**Link:** ${newsletterData.link}`
+            })
+          })
+
+
+
         } else {
           await interaction.followUp(
             "Failed to save your details. Please try again later."
