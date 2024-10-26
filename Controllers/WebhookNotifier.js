@@ -5,12 +5,12 @@ const userjoinedController = (req, res) => {
         return res.status(400).json({ error: 'Missing webhook URL or message' });
     }
 
-    // Send the message to the Discord webhook
+ 
     fetch(webhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            content: message, // The message to send to the Discord channel
+            content: message,  
         })
     })
     .then(response => response.json())

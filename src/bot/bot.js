@@ -7,11 +7,11 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 
 // Importing routes
-const listARoutes = require("../Routes/listARoutes");
-const listBRoutes = require("../Routes/listBRoutes");
-const utmRoutes = require("../Routes/utmRoutes");
-const AdminRoutes = require("../Routes/AdminRoutes")
-const ADMIN_USER_ID = process.env.ADMIN_USER_ID
+const listARoutes = require("../../Routes/listARoutes");
+// const listBRoutes = require("../../Routes/listBRoutes");
+const utmRoutes = require("../../Routes/utmRoutes");
+const AdminRoutes = require("../../Routes/AdminRoutes")
+// const ADMIN_USER_ID = process.env.ADMIN_USER_ID
 const API  ="http://localhost:3030/api/admin"
 const WEBHOOK_URL = process.env.USER_NOTIFIER
 const REGISTRATION_NOTIFIER = process.env.REGISTRATION_NOTIFIER
@@ -44,6 +44,12 @@ app.use("/api/utm", utmRoutes);
 app.listen(3030, () => {
   console.log("Server is running on port 3030");
 });
+
+
+
+
+
+
 
 // ----------------- Discord Bot Section -----------------
 const { REST } = require("@discordjs/rest");
@@ -108,23 +114,6 @@ const rest = new REST({ version: "9" }).setToken(
 client.once("ready", () => {
   console.log("Bot is online!");
 });
-
-// client.on('guildMemberAdd', member => {
-//   const newUserTag = member.user.tag;
-//   console.log(`New user joined: ${newUserTag}`);
- 
-//   fetch(API, {
-//       method: 'POST',
-//       headers: { 'Content-Type': 'application/json' },
-//       body: JSON.stringify({
-//           webhookUrl: process.env.USER_NOTIFIER, // The webhook URL, set as an environment variable
-//           message: `New user joined: ${newUserTag}`
-//       })
-//   })
-//   .then(res => res.json())
-//   .then(json => console.log('Webhook response:', json))
-//   .catch(err => console.error('Error sending request to API:', err));
-// });
  
 client.on('guildCreate', (guild) => {
     const guildName = guild.name;
@@ -423,17 +412,17 @@ async function handleEditProfile(interaction) {
 // Handle the cross-promote interaction
 async function handleCrossPromote(interaction) {
   try {
-    const response = await fetch("http://localhost:3030/api/list", {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    });
+    // const response = await fetch("http://localhost:3030/api/list", {
+    //   method: "GET",
+    //   headers: { "Content-Type": "application/json" },
+    // });
 
     const creators = await response.json();
 
-    if (creators.length === 0) {
-      await interaction.reply("No creators available for this action.");
-      return;
-    }
+    // if (creators.length === 0) {
+    //   await interaction.reply("No creators available for this action.");
+    //   return;
+    // }
 
     await interaction.reply({
       content: `Here are the available creators:\n${creators
@@ -488,34 +477,34 @@ async function handleCrossPromote(interaction) {
 }
 
 // Handle the collaborate command and fetch the UTM link
-async function handleCollaborate(interaction, creatorId) {
-  try {
-    const response = await fetch(
-      `http://localhost:3030/api/link?creatorId=${creatorId}`,
-      {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+// async function handleCollaborate(interaction, creatorId) {
+//   try {
+//     const response = await fetch(
+//       `http://localhost:3030/api/link?creatorId=${creatorId}`,
+//       {
+//         method: "GET",
+//         headers: { "Content-Type": "application/json" },
+//       }
+//     );
 
-    if (!response.ok) {
-      await interaction.reply("Failed to fetch the link. Please try again.");
-      return;
-    }
+//     if (!response.ok) {
+//       await interaction.reply("Failed to fetch the link. Please try again.");
+//       return;
+//     }
 
-    const data = await response.text();
-    console.log(data);
-    const dataurl = data.replace(/"/g, "");
-    console.log(dataurl);
+//     const data = await response.text();
+//     console.log(data);
+//     const dataurl = data.replace(/"/g, "");
+//     console.log(dataurl);
 
-    const utmLink = `${dataurl}/signup?utm_source=${interaction.user.id}&utm_medium=murali&utm_campaign=cross_promotion`;
+//     const utmLink = `${dataurl}/signup?utm_source=${interaction.user.id}&utm_medium=murali&utm_campaign=cross_promotion`;
 
-    await interaction.followUp(`Here is your UTM link: ${utmLink}`);
-  } catch (error) {
-    console.error("Error during collaboration:", error);
-    await interaction.reply(
-      "Failed to generate a UTM link. Please try again later."
-    );
-  }
-}
+//     await interaction.followUp(`Here is your UTM link: ${utmLink}`);
+//   } catch (error) {
+//     console.error("Error during collaboration:", error);
+//     await interaction.reply(
+//       "Failed to generate a UTM link. Please try again later."
+//     );
+//   }
+// }
 client.login(process.env.DISCORDJS_BOT_TOKEN);
