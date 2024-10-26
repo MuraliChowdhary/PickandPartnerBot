@@ -1,6 +1,6 @@
 require("dotenv").config();
 const fetch = (...args) =>
-import("node-fetch").then(({ default: fetch }) => fetch(...args));
+  import("node-fetch").then(({ default: fetch }) => fetch(...args));
 
 const express = require("express");
 const mongoose = require("mongoose");
@@ -35,8 +35,6 @@ app.use("/api/admin", AdminRoutes);
 app.use("/api/", listARoutes);
 // app.use("/api/", listBRoutes);
 app.use("/api/utm", utmRoutes);
-
-
 
 // handleRegister function
 async function handleRegister(interaction) {
@@ -92,32 +90,30 @@ async function handleRegister(interaction) {
           });
 
           const webhookPayload = {
-            content: `📋 **Registration Notifier**\n` +
-                     `---------------------------\n` +
-                     `**User Details:**\n` +
-                     `- Discord ID: ${newsletterData.discordId}\n` +
-                     `- Newsletter Name: ${newsletterData.newsletterName}\n` +
-                     `---------------------------\n` +
-                     `**Newsletter Info:**\n` +
-                     `- Niche: ${newsletterData.niche}\n` +
-                     `- Subscribers: ${newsletterData.subscribers}\n` +
-                     `- Link: ${newsletterData.link}`
-        };
-        
-        
-
+            content:
+              `📋 **Registration Notifier**\n` +
+              `---------------------------\n` +
+              `**User Details:**\n` +
+              `- Discord ID: ${newsletterData.discordId}\n` +
+              `- Newsletter Name: ${newsletterData.newsletterName}\n` +
+              `---------------------------\n` +
+              `**Newsletter Info:**\n` +
+              `- Niche: ${newsletterData.niche}\n` +
+              `- Subscribers: ${newsletterData.subscribers}\n` +
+              `- Link: ${newsletterData.link}`,
+          };
 
           await fetch(REGISTRATION_NOTIFIER, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              content: webhookPayload.content
-               }),
+              content: webhookPayload.content,
+            }),
           });
         } else {
-          await interaction.followUp(response.message + 
-            "Failed to save your details. Please try again later."
-
+          await interaction.followUp(
+            response.message +
+              "Failed to save your details. Please try again later."
           );
         }
       }
