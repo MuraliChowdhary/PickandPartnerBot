@@ -20,15 +20,15 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// MongoDB connection
-mongoose
-  .connect(process.env.MONGODB_URI)
-  .then(() => {
-    console.log("Database Connected Successfully");
-  })
-  .catch((err) => {
-    console.error("Database connection error:", err);
-  });
+// // MongoDB connection
+// mongoose
+//   .connect(process.env.MONGODB_URI)
+//   .then(() => {
+//     console.log("Database Connected Successfully");
+//   })
+//   .catch((err) => {
+//     console.error("Database connection error:", err);
+//   });
 
 // API routes
 app.use("/api/admin", AdminRoutes);

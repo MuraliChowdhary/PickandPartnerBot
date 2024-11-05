@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const { mainDb } = require('./db/db');
+
 
 const ListASchema = new mongoose.Schema({
   discordId: { 
@@ -68,4 +70,6 @@ const ListASchema = new mongoose.Schema({
   }
 });
 
-module.exports = mongoose.model('ListA', ListASchema);
+module.exports = mainDb.model('ListA', ListASchema);
+
+
