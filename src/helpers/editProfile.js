@@ -36,8 +36,7 @@ app.use("/api/", listARoutes);
 app.use("/api/utm", utmRoutes);
 
 async function handleEditProfile(interaction) {
-  await interaction.deferReply();
-
+   console.log("hello")
   const discordId = interaction.user.id;
   let profile;
 

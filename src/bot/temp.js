@@ -5,47 +5,41 @@ const fetch = (...args) =>
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const PORT=3030
+const PORT = 3030;
 // Importing routes
 const listARoutes = require("../../Routes/listARoutes");
 const listBRoutes = require("../../Routes/listBRoutes");
 const utmRoutes = require("../../Routes/utmRoutes");
 const AdminRoutes = require("../../Routes/AdminRoutes");
 const WEBHOOK_URL = process.env.USER_NOTIFIER;
-const { mainDb, secondaryDb } = require('../../Models/db/db');
+const { mainDb, secondaryDb } = require("../../Models/db/db");
 
 const { handleRegister } = require("../helpers/registration");
 const { handleEditProfile } = require("../helpers/editProfile");
 const { handleCrossPromote } = require("../helpers/crosspromotion");
 const { handleHelp } = require("../helpers/help");
- 
+
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-Promise.all([
-  mainDb.asPromise(),
-  secondaryDb.asPromise()
-])
-.then(() => {
-  console.log('Both databases connected successfully!');
-  app.listen(PORT, () => {
+Promise.all([mainDb.asPromise(), secondaryDb.asPromise()])
+  .then(() => {
+    console.log("Both databases connected successfully!");
+    app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
+    });
+  })
+  .catch((error) => {
+    console.error("Error connecting to databases:", error);
+    process.exit(1); // Exit the process if database connections fail
   });
-})
-.catch(error => {
-  console.error('Error connecting to databases:', error);
-  process.exit(1); // Exit the process if database connections fail
-});
-
 
 // API routes
 app.use("/api/admin", AdminRoutes);
 app.use("/api/", listARoutes);
 // app.use("/api/", listBRoutes);
 app.use("/api/utm", utmRoutes);
-
- 
 
 const { REST } = require("@discordjs/rest");
 const { Routes } = require("discord-api-types/v9");
@@ -63,7 +57,7 @@ const {
   handleFeedback,
   handleSubmitFeedback,
 } = require("../helpers/handleFeedback");
-const {handleSendUtmLinks}=require("../helpers/utmtracking")
+const { handleSendUtmLinks } = require("../helpers/utmtracking");
 // Set up the Discord client with the required intents
 const client = new Client({
   intents: [
@@ -94,13 +88,13 @@ const commands = [
     description: "Send UTM links to specified Discord IDs",
     options: [
       {
-        type: 3, // STRING type
+        type: 3,
         name: "discord_id_1",
         description: "The first Discord ID to send a UTM link to.",
         required: true,
       },
       {
-        type: 3, // STRING type
+        type: 3,
         name: "discord_id_2",
         description: "The second Discord ID to send a UTM link to.",
         required: true,
@@ -120,11 +114,11 @@ const commands = [
     description: "Show feedback details and usage instructions.",
   },
   {
-    name: "submit_feedback",
+    name: "submit_feedback", // Changed from submit-feedback to submit_feedback
     description: "Submit your feedback about the bot.",
     options: [
       {
-        type: 3, // STRING type
+        type: 3,
         name: "message",
         description: "Your feedback message or issue details.",
         required: true,
@@ -132,8 +126,6 @@ const commands = [
     ],
   },
 ];
-
-
 
 const rest = new REST({ version: "9" }).setToken(
   process.env.DISCORDJS_BOT_TOKEN
@@ -213,34 +205,30 @@ client.on("guildCreate", async (guild) => {
   }
 });
 
-client.on('interactionCreate', async (interaction) => {
+client.on("interactionCreate", async (interaction) => {
   if (!interaction.isCommand()) return;
 
   if (interaction.commandName === "register") {
     await handleRegister(interaction);
-  } else if (interaction.commandName === "cross-promote") {
+  } else if (interaction.commandName === "cross_promote") {
     await handleCrossPromote(interaction);
-  } else if (interaction.commandName === "edit-profile") {
+  } else if (interaction.commandName === "edit_profile") {
+    console.log("Edit profile command triggered");
     await handleEditProfile(interaction);
   } else if (interaction.commandName === "send_utm_links") {
-    await handleSendUtmLinks(client,interaction); // New command handling function
+    await handleSendUtmLinks(client, interaction);
   } else if (interaction.commandName === "help") {
     await handleHelp(interaction);
   } else if (interaction.commandName === "guidelines") {
     await handleGuidelines(interaction);
   } else if (interaction.commandName === "feedback") {
     await handleFeedback(interaction);
-  } else if (interaction.commandName === "submit-feedback") {
+  } else if (interaction.commandName === "submit_feedback") {
     await handleSubmitFeedback(interaction);
   }
 });
 
-
- 
-
-
 client.login(process.env.DISCORDJS_BOT_TOKEN);
-module.exports={
-  client
-  
-}
+module.exports = {
+  client,
+};

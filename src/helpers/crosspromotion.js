@@ -17,18 +17,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// mongoose
-//   .connect(process.env.MONGODB_URI, {
-//     // useNewUrlParser: true,
-//     // useUnifiedTopology: true,
-//   })
-//   .then(() => {
-//     console.log("Database Connected Successfully");
-//   })
-//   .catch((err) => {
-//     console.error("Database connection error:", err);
-//   });
-
 // API routes
 app.use("/api/admin", AdminRoutes);
 app.use("/api/", listARoutes);
@@ -36,6 +24,7 @@ app.use("/api/", listARoutes);
 app.use("/api/utm", utmRoutes);
 
 async function handleCrossPromote(interaction) {
+  console.log("Hello")
   const requiredRoleId = process.env.REQUIRED_ROLE_ID;
   const member = interaction.member;
 
@@ -50,79 +39,100 @@ async function handleCrossPromote(interaction) {
     return;
   }
   try {
-    // Extract necessary details from the interaction object
     const discordId = interaction.user.id;
     const username = interaction.user.username;
 
-    console.log(discordId);
-    console.log(username);
-    // Fetch the user's registration data
-    const responseData = await fetch(
-      `http://localhost:3030/api/profile?discordId=${discordId}`,
-      {
-        method: "GET",
+    // Prompt the user to provide additional information
+    await interaction.reply({
+      content:
+        "Please provide any additional details for the cross-promotion. You have 60 seconds to respond.",
+      ephemeral: true,
+    });
+
+    // Set up the message collector
+    const filter = (response) => response.author.id === interaction.user.id;
+    const collector = interaction.channel.createMessageCollector({
+      filter,
+      time: 60000, // 60 seconds
+    });
+
+    // Event listener for collecting messages
+    collector.on("collect", async (response) => {
+      // Handle each response from the user
+      const additionalInfo = response.content;
+      console.log(`User additional info: ${additionalInfo}`);
+
+      // Proceed with fetching registration data and sending the cross-promotion request
+      const responseData = await fetch(
+        `http://localhost:3030/api/profile?discordId=${discordId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!responseData.ok) {
+        throw new Error(
+          `Error fetching registration data: ${responseData.statusText}`
+        );
+      }
+
+      const dataMess = await responseData.json();
+      const { niche, subscribers, newsletterName, link } = dataMess;
+
+      // Construct the webhook payload including additional information
+      const webhookPayload = {
+        content:
+          `🔗 **Cross Promotion Request** 📢\n` +
+          `---\n` +
+          `**User Details**:\n` +
+          `**Discord ID:** ${discordId}\n` +
+          `**Username:** ${username}\n` +
+          `---\n` +
+          `**Newsletter Info**:\n` +
+          `**Niche:** ${niche}\n` +
+          `**Subscribers:** ${subscribers}\n` +
+          `**Newsletter Name:** ${newsletterName}\n` +
+          `**Link:** [Visit Newsletter](${link})\n` +
+          `**Additional Information:** ${additionalInfo}\n` +
+          `---\n` +
+          `*This request was made at ${new Date().toLocaleString()}*`,
+      };
+
+      // Send the webhook
+      const response2 = await fetch(CROSSPROMOTION_TRIGGER, {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
+        body: JSON.stringify(webhookPayload),
+      });
+
+      if (!response2.ok) {
+        throw new Error(`Error sending webhook: ${response2.statusText}`);
       }
-    );
 
-    // Ensure the response is OK
-    if (!responseData.ok) {
-      throw new Error(
-        `Error fetching registration data: ${responseData.statusText}`
+      // Confirmation message to the user
+      await interaction.followUp(
+        "✅ **Your cross-promotion request has been submitted!**\n\nOur team will contact you shortly. Thank you! 🚀"
       );
-    }
 
-    // Parse the response data
-    const dataMess = await responseData.json();
-    console.log(dataMess);
-
-    // Extract necessary information
-    const niche = dataMess.niche;
-    const subscribers = dataMess.subscribers;
-    const newsLetterName = dataMess.newsletterName;
-    const link = dataMess.link;
-
-    // Construct the payload for the webhook
-    const webhookPayload = {
-      content:
-        `🔗 **Cross Promotion Request** 📢\n` +
-        `---\n` +
-        `**User Details**:\n` +
-        `**Discord ID:** ${discordId}\n` +
-        `**Username:** ${username}\n` +
-        `---\n` +
-        `**Newsletter Info**:\n` +
-        `**Niche:** ${niche}\n` +
-        `**Subscribers:** ${subscribers}\n` +
-        `**Newsletter Name:** ${newsLetterName}\n` +
-        `**Link:** [Visit Newsletter](${link})\n` +
-        `---\n` +
-        `*This request was made at ${new Date().toLocaleString()}*`,
-    };
-
-    // Send the webhook
-    const response = await fetch(CROSSPROMOTION_TRIGGER, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(webhookPayload),
+      // Stop the collector after handling
+      collector.stop();
     });
 
-    // Check the response status
-    if (!response.ok) {
-      throw new Error(`Error sending webhook: ${response.statusText}`);
-    }
-
-    const data = await response.text();
-    console.log(data);
-
-    // Optionally send a response back to the user
-    await interaction.reply(
-      "✅ **Your cross-promotion request has been submitted!**\n\nOur team will contact you shortly. Thank you! 🚀"
-    );
+    // Handle when the collector time expires without a response
+    collector.on("end", async (collected) => {
+      if (collected.size === 0) {
+        await interaction.followUp({
+          content:
+            "No additional information received. Proceeding with the request as is.",
+          ephemeral: true,
+        });
+      }
+    });
   } catch (error) {
     console.error("Error in handleCrossPromote:", error);
     await interaction.reply(

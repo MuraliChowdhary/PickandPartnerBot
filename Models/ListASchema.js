@@ -40,6 +40,7 @@ const ListASchema = new mongoose.Schema({
     required: true,
     min: [0, 'Subscribers cannot be negative.'] // Ensure subscribers is not negative
   },
+ 
   totalPromotionsGiven: { 
     type: Number, 
     default: 0,

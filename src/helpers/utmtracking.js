@@ -49,6 +49,8 @@ async function handleSendUtmLinks(client, interaction) {
 
         console.log(link1 + " " + link2);
 
+         
+        
         // Function to get a short URL from the Render server
         async function getShortUrl(link) {
             const response = await fetch('https://pickandpartner.onrender.com/shorten', {

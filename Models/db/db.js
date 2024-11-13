@@ -11,11 +11,11 @@ const secondaryDb = mongoose.createConnection('mongodb+srv://muralisudireddy0:p2
   // useNewUrlParser: true,
   // useUnifiedTopology: true
 });
-
+  
 mainDb.on('connected', () => {
   console.log('Connected to the main database (CrossPromotion)');
 });
-    
+
 secondaryDb.on('connected', () => {
   console.log('Connected to the secondary database');
 });
