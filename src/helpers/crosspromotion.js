@@ -39,6 +39,15 @@ async function handleCrossPromote(interaction) {
   //   });
   //   return;
   // }
+   
+
+  //fetch info of the user from db check the isVerified variable ? true =>> access :false sorry dont have permission
+
+  //isverified:crosspromotion: isEligible if false then make true
+  //***if isEligible is true: send message saying to wait***
+
+  
+
 
   try {
     await interaction.deferReply(); // Acknowledge interaction before processing

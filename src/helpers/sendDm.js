@@ -30,6 +30,7 @@ async function sendDM(client, discordId, message) {
     try {
         const user = await client.users.fetch(discordId);
         await user.send(message);
+        //totalPromotionsGiven++
         console.log(`DM sent to ${discordId}`);
     } catch (error) {
         console.error(`Error sending DM to ${discordId}:`, error);

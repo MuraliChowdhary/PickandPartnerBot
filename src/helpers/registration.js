@@ -88,6 +88,11 @@ async function handleRegister(interaction) {
           await interaction.followUp({
             content: "Registration successful!",
           });
+        
+       // verification triggering ok  add button
+       // db isVerified:true
+       
+       
 
           const webhookPayload = {
             content:

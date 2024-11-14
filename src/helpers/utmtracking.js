@@ -113,6 +113,8 @@ async function handleSendUtmLinks(client, interaction) {
             sendDM(client, discordId1, `Here is your Promotion Link: ${shortUrl1}`),
             sendDM(client, discordId2, `Here is your Promotion Link: ${shortUrl2}`)
         ]);
+            //***isEligible:false***
+           //increment totalpromomtiongvien++
 
         // Final update: Inform the admin that the process is completed
         await interaction.editReply("Process completed! DMs sent with the short URLs.");

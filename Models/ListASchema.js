@@ -60,6 +60,11 @@ const ListASchema = new mongoose.Schema({
     type: Boolean, 
     default: false 
   },
+  isVerified:{
+    type:Boolean,
+    default:false
+  },
+
   maxPromotionsAllowed: { 
     type: Number, 
     default: 5,
@@ -72,5 +77,6 @@ const ListASchema = new mongoose.Schema({
 });
 
 module.exports = mainDb.model('ListA', ListASchema);
+
 
 

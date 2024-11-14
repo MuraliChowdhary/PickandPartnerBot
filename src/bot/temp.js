@@ -114,7 +114,7 @@ const commands = [
     description: "Show feedback details and usage instructions.",
   },
   {
-    name: "submit_feedback", // Changed from submit-feedback to submit_feedback
+    name: "submit_feedback",  
     description: "Submit your feedback about the bot.",
     options: [
       {
@@ -193,6 +193,9 @@ client.on("interactionCreate", async (interaction) => {
     await handleFeedback(interaction);
   } else if (interaction.commandName === "submit_feedback") {
     await handleSubmitFeedback(interaction);
+  }
+  else if(interaction.commandName === "send_message_to_user"){
+    await handleSendMessageToUser(interaction);
   }
 });
 
