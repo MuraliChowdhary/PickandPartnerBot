@@ -65,7 +65,7 @@ const client = new Client({
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.DirectMessages,
-    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildMembers, // To listen for new members joining
   ],
   partials: [Partials.Message, Partials.Channel, Partials.Reaction],
 });
@@ -147,64 +147,32 @@ client.once("ready", () => {
   console.log("Bot is online!");
 });
 
-client.on("guildCreate", (guild) => {
-  const guildName = guild.name;
-  const guildId = guild.id;
+client.on("guildMemberAdd", async (member) => {
+  console.log(`New member joined: ${member.user.username}`);  // Log the new member
 
-  console.log(`Bot added to a new server: ${guildName} (ID: ${guildId})`);
+  try {
+    // Check if the member has DM permissions
+    if (member.user.dmChannel) {
+      console.log("DM channel already exists");  // Log if DM channel exists
+    } else {
+      console.log("Creating a new DM channel..."); // Log if a new DM channel is being created
+    }
 
-  // Create the message to be sent to the admin
-  const message = `The bot has been added to a new server: **${guildName}** (ID: ${guildId})`;
-
-  // Send a POST request to the webhook URL
-  fetch(WEBHOOK_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      content: message, // The message you want to send to the Discord channel
-    }),
-  })
-    .then((response) => {
-      // Check if the response is OK
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.text(); // Only parse the response if it's OK
-    })
-    .then((data) => {
-      console.log("Webhook successfully triggered:", data);
-    })
-    .catch((error) => {
-      console.error("Error triggering webhook:", error.message); // Log the error message
-    });
-});
-
-client.on("guildCreate", async (guild) => {
-  console.log(`Bot added to a new server: ${guild.name}`);
-
-  // Try to find the existing 'general' channel
-  const generalChannel = guild.channels.cache.find(
-    (channel) => channel.name === "general" && channel.type === 0 // GUILD_TEXT
-  );
-
-  // If the general channel exists, send a welcome message
-  if (generalChannel) {
-    generalChannel.send(
-      `Welcome to the Pick and Partner community, 🎉\n` +
-        `Here, you can connect, collaborate, and cross-promote your newsletter with a diverse group of creators.\n` +
-        `Before you join, please tell us more about yourself so we can find the perfect match for you.\n` +
-        `Here are our commands: \n` +
-        `/register - for registration, please provide your details.\n` +
-        `/cross-promote - for cross promotion (available after verification).\n` +
-        `If you have any questions, feel free to ask.\n`
+    await member.send(
+      `🎉 **Welcome to the Pick and Partner community, ${member.user.username}!** 🎉\n\n` +
+      `We are thrilled to have you on board! Please check out these awesome commands to get started:\n\n` +
+      `1️. **/register** - Register your details with us so we can match you with the best partners!\n\n` +
+      `2️. **/cross-promote** -  Promote other creators' newsletters and let others promote yours in return! 🤝\n\n` +
+      `If you have any questions or need help, feel free to reach out! \n` 
     );
-  } else {
-    console.log(`No general channel found in ${guild.name}.`);
+    console.log("DM sent successfully!");  // Log when the DM is successfully sent
+  } catch (error) {
+    console.error("Error sending DM:", error.message);  // Log any error while sending DM
   }
 });
 
+
+// Bot interaction event
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isCommand()) return;
 
