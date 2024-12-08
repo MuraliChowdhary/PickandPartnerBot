@@ -10,25 +10,12 @@ const cors = require("cors");
 const listARoutes = require("../../Routes/listARoutes");
 const utmRoutes = require("../../Routes/utmRoutes");
 const AdminRoutes = require("../../Routes/AdminRoutes");
-// const ADMIN_USER_ID = process.env.ADMIN_USER_ID;
-// const API = "http://localhost:3030/api/admin";
-// const WEBHOOK_URL = process.env.USER_NOTIFIER;
+ 
 const REGISTRATION_NOTIFIER = process.env.REGISTRATION_NOTIFIER;
 
-// Set up Express app
 const app = express();
 app.use(cors());
 app.use(express.json());
-
-// // MongoDB connection
-// mongoose
-//   .connect(process.env.MONGODB_URI)
-//   .then(() => {
-//     console.log("Database Connected Successfully");
-//   })
-//   .catch((err) => {
-//     console.error("Database connection error:", err);
-//   });
 
 // API routes
 app.use("/api/admin", AdminRoutes);
@@ -91,7 +78,7 @@ async function handleRegister(interaction) {
         
        // verification triggering ok  add button
        // db isVerified:true
-       
+
        
 
           const webhookPayload = {

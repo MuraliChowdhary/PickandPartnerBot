@@ -58,6 +58,9 @@ const {
   handleSubmitFeedback,
 } = require("../helpers/handleFeedback");
 const { handleSendUtmLinks } = require("../helpers/utmtracking");
+const {
+  handleSendMessageToUser,
+} = require("../helpers/handleSendMessageToUser");
 // Set up the Discord client with the required intents
 const client = new Client({
   intents: [
@@ -114,13 +117,32 @@ const commands = [
     description: "Show feedback details and usage instructions.",
   },
   {
-    name: "submit_feedback",  
+    name: "submit_feedback", // Changed from submit-feedback to submit_feedback
     description: "Submit your feedback about the bot.",
     options: [
       {
         type: 3,
         name: "message",
         description: "Your feedback message or issue details.",
+        required: true,
+      },
+    ],
+  },
+  {
+    name: "send_message_to_user",
+    description: "Send a custom message to a specific user by their Discord ID",
+    options: [
+      {
+        type: 3,
+        name: "discord_id",
+        description:
+          "The Discord ID of the user you want to send a message to.",
+        required: true,
+      },
+      {
+        type: 3,
+        name: "message",
+        description: "The message to send to the user.",
         required: true,
       },
     ],
@@ -148,29 +170,56 @@ client.once("ready", () => {
 });
 
 client.on("guildMemberAdd", async (member) => {
-  console.log(`New member joined: ${member.user.username}`);  // Log the new member
+  console.log(`New member joined: ${member.user.username}`);
+  const webhook_payload = {
+     content: `📋 **User Joined Notifier**\n` +
+    `---------------------------\n` +
+    `**User Details:**\n` +
+    `Discord ID: ${member.user.id}\n` +  
+    `Username: ${member.user.username}\n` +  
+    `---------------------------\n` 
+  }
 
+  async function sendUserjoined() {
+    try {
+      const response = await fetch(WEBHOOK_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ content: webhook_payload.content }),
+      });
+      if (response.ok) {
+        console.log("User notification trigger sent");
+      } else {
+        console.error("Error sending user joined trigger");
+      }
+    } catch (error) {
+      console.error("Error with the webhook:", error.message);
+    }
+  }
+  
   try {
-    // Check if the member has DM permissions
     if (member.user.dmChannel) {
-      console.log("DM channel already exists");  // Log if DM channel exists
+      console.log("DM channel already exists"); // Log if DM channel exists
     } else {
       console.log("Creating a new DM channel..."); // Log if a new DM channel is being created
     }
 
+    sendUserjoined();
+
     await member.send(
       `🎉 **Welcome to the Pick and Partner community, ${member.user.username}!** 🎉\n\n` +
-      `We are thrilled to have you on board! Please check out these awesome commands to get started:\n\n` +
-      `1️. **/register** - Register your details with us so we can match you with the best partners!\n\n` +
-      `2️. **/cross-promote** -  Promote other creators' newsletters and let others promote yours in return! 🤝\n\n` +
-      `If you have any questions or need help, feel free to reach out! \n` 
+        `We are thrilled to have you on board! Please check out these awesome commands to get started:\n\n` +
+        `1️. **/register** - Register your details with us so we can match you with the best partners!\n\n` +
+        `2️. **/cross-promote** -  Promote other creators' newsletters and let others promote yours in return! 🤝\n\n` +
+        `If you have any questions or need help, feel free to reach out! \n`
     );
-    console.log("DM sent successfully!");  // Log when the DM is successfully sent
+    console.log("DM sent successfully!"); // Log when the DM is successfully sent
   } catch (error) {
-    console.error("Error sending DM:", error.message);  // Log any error while sending DM
+    console.error("Error sending DM:", error.message); // Log any error while sending DM
   }
 });
-
 
 // Bot interaction event
 client.on("interactionCreate", async (interaction) => {
@@ -193,9 +242,8 @@ client.on("interactionCreate", async (interaction) => {
     await handleFeedback(interaction);
   } else if (interaction.commandName === "submit_feedback") {
     await handleSubmitFeedback(interaction);
-  }
-  else if(interaction.commandName === "send_message_to_user"){
-    await handleSendMessageToUser(interaction);
+  } else if (interaction.commandName === "send_message_to_user") {
+    await handleSendMessageToUser(interaction, client);
   }
 });
 

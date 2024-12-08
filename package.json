@@ -2,7 +2,7 @@
   "name": "discord-cross-promotion-bot",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/bot/temp.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

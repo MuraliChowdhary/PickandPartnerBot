@@ -46,11 +46,11 @@ async function handleCrossPromote(interaction) {
   //isverified:crosspromotion: isEligible if false then make true
   //***if isEligible is true: send message saying to wait***
 
-  
+
 
 
   try {
-    await interaction.deferReply(); // Acknowledge interaction before processing
+    await interaction.deferReply();  
 
     const discordId = interaction.user.id;
     const username = interaction.user.username;
