@@ -100,7 +100,7 @@ async function handleVerified(interaction) {
                 description: `
       **Congratulations! You are now verified and eligible to use the CrossPromote feature! 🎉**
       
-      You can now perform cross-promotions and utilize the **/crosspromote** command to boost your presence. 🚀
+      You can now perform cross-promotions and utilize the **/cross-promote** command to boost your presence. 🚀
       
       Enjoy and start promoting with confidence! 🙌
       

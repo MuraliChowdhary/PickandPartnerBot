@@ -293,8 +293,8 @@ client.on("guildMemberAdd", async (member) => {
 });
 
 // Bot interaction event
-const adminIds = ["887369348149293116", "987654321098765432"]; // List of admin Discord IDs
-
+const adminIds = [process.env.ADMIN_DISCORD_ID]; // List of admin Discord IDs
+ 
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isCommand()) return;
 

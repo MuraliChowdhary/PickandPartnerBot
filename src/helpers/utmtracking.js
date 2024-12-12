@@ -38,7 +38,7 @@ async function isUserVerified(discordId) {
             throw new Error('Failed to check verification status');
         }
         const data = await response.json();
-        return data.isVerified; // Assuming the response contains `isVerified` key
+        return data.verified; // Assuming the response contains `isVerified` key
     } catch (error) {
         console.error('Error checking verification status:', error);
         return false;
