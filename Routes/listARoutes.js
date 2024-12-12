@@ -5,6 +5,8 @@ const {
   getLink,
   updateProfile,
   getProfile,
+  verify,verified,isLinkGenerated,
+  isLinkVerfied
 } = require("../Controllers/listAController");
 const router = express.Router();
 
@@ -13,4 +15,8 @@ router.get("/list", getAllListA);
 router.get("/profile", getProfile);
 router.put("/update-profile", updateProfile);
 router.get("/link", getLink);
+router.get("/isVerify",verify);
+router.post("/verify",verified);
+router.get("/linkGenarated",isLinkGenerated)
+router.post("/linkverify",isLinkVerfied)
 module.exports = router;

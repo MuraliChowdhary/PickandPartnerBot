@@ -1,6 +1,4 @@
-require("dotenv").config();
 const fetch = (...args) => import("node-fetch").then(({ default: fetch }) => fetch(...args));
-
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -31,6 +29,20 @@ async function getUsernameByDiscordId(discordId, client) {
 
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function isUserVerified(discordId) {
+    try {
+        const response = await fetch(`http://localhost:3030/api/isVerify?discordId=${discordId}`);
+        if (!response.ok) {
+            throw new Error('Failed to check verification status');
+        }
+        const data = await response.json();
+        return data.isVerified; // Assuming the response contains `isVerified` key
+    } catch (error) {
+        console.error('Error checking verification status:', error);
+        return false;
+    }
 }
 
 async function handleSendUtmLinks(client, interaction) {
@@ -69,18 +81,29 @@ async function handleSendUtmLinks(client, interaction) {
             return;
         }
 
-        const utmLink1 = `${link1}/?utm_source=${discordId1}&utm_medium=pickandpartner&utm_campaign=crosspromotion`;
-        const utmLink2 = `${link2}/?utm_source=${discordId2}&utm_medium=pickandpartner&utm_campaign=crosspromotion`;
+        // Check if both users are verified
+        const [isVerified1, isVerified2] = await Promise.all([
+            isUserVerified(discordId1),
+            isUserVerified(discordId2)
+        ]);
 
+        if (!isVerified1 || !isVerified2) {
+            await interaction.editReply("One or both users are not verified. Please verify the users first.");
+            return;
+        }
+
+        const utmLink1 = `${link2}/?utm_source=${discordId1}&utm_medium=pickandpartner&utm_campaign=crosspromotion&utm_content=${discordId2}`;
+        const utmLink2 = `${link1}/?utm_source=${discordId2}&utm_medium=pickandpartner&utm_campaign=crosspromotion&utm_content=${discordId1}`;
+        
         await interaction.editReply("Generating short URLs...");
         await delay(1000);
 
         async function getShortUrl(link) {
             try {
-                const response = await fetch('http://localhost:3004/shorten', {
+                const response = await fetch('https://pickandpartner.onrender.com/shorten', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ originalUrl: link, discordId1, discordId2 })
+                    body: JSON.stringify({ originalUrl: link})
                 });
                 if (!response.ok) throw new Error("Failed to fetch short URL");
                 const result = await response.json();
@@ -105,8 +128,8 @@ async function handleSendUtmLinks(client, interaction) {
         await delay(1000);
 
         const dmResults = await Promise.all([
-            sendDM(client, discordId2, `Here is your Promotion Link: ${shortUrl1}`),
-            sendDM(client, discordId1, `Here is your Promotion Link: ${shortUrl2}`)
+            sendDM(client, discordId1, `Here is your Promotion Link: ${shortUrl1}`),
+            sendDM(client, discordId2, `Here is your Promotion Link: ${shortUrl2}`)
         ]);
 
         const failedDms = dmResults.filter(result => result === false);
@@ -114,7 +137,30 @@ async function handleSendUtmLinks(client, interaction) {
             await interaction.editReply("Process completed! Some DMs could not be sent.");
         } else {
             await interaction.editReply("Process completed! DMs sent with the short URLs.");
+        
+            try {
+                // Send POST request to verify the links for both users
+                const response = await fetch("http://localhost:3030/api/linkverify", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ discordId1, discordId2 })
+                });
+        
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log(data);
+                    await interaction.editReply(data.message); // Optionally, respond with message from server
+                } else {
+                    const errorData = await response.json();
+                    console.error('Error:', errorData);
+                    await interaction.editReply("There was an error verifying the link.");
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                await interaction.editReply("An error occurred while verifying the link.");
+            }
         }
+        
 
     } catch (error) {
         console.error('Error processing Discord IDs and sending messages:', error);

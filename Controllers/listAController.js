@@ -20,6 +20,18 @@ exports.addToListA = async (req, res) => {
       return res.status(400).json({ message: "Invalid URL format" });
     }
 
+    // Check for duplicate discordId
+    const existingDiscordId = await ListA.findOne({ discordId });
+    if (existingDiscordId) {
+      return res.status(400).json({ message: "This Discord ID is already registered" });
+    }
+
+    // Check for duplicate link
+    const existingLink = await ListA.findOne({ link });
+    if (existingLink) {
+      return res.status(400).json({ message: "This newsletter link is already registered" });
+    }
+
     const newEntry = new ListA({
       discordId,
       newsletterName,
@@ -35,6 +47,7 @@ exports.addToListA = async (req, res) => {
     res.status(500).json({ message: "Error adding to List A" });
   }
 };
+
 
 exports.getAllListA = async (req, res) => {
   try {
@@ -122,5 +135,132 @@ exports.updateProfile = async (req, res) => {
   } catch (error) {
     console.error("Error updating profile:", error);
     res.status(500).json({ error: "Error updating profile" });
+  }
+};
+
+
+exports.verify = async (req, res) => {
+  const  discordId  = req.query.discordId
+  console.log(discordId)
+  try {
+    // Find the entry in the ListA collection based on discordId
+    const existingEntry = await ListA.findOne({ discordId });
+
+    if (!existingEntry) {
+      return res.status(404).json({
+        message: "You are not registered in the cross-promotion program.",
+      });
+    }
+
+    // Return the isVerified status
+    const verified = existingEntry.isVerified;
+    return res.status(200).json({ verified });
+  } catch (err) {
+    // Log the error and send a server error response
+    console.error("Error verifying user:", err);
+    res.status(500).json({
+      error: "An internal server error occurred while verifying the user.",
+    });
+  }
+};
+
+
+exports.verified = async (req, res) => {
+  const { discordId } = req.body;
+
+  if (!discordId) {
+    return res.status(400).json({
+      message: "Discord ID is required.",
+    });
+  }
+
+  try {
+    const existingEntry = await ListA.findOne({ discordId });
+
+    if (!existingEntry) {
+      return res.status(404).json({
+        message: "You are not registered.",
+      });
+    }
+
+    // Update the isVerified status
+    existingEntry.isVerified = true;
+    await existingEntry.save();
+
+    res.status(200).json({
+      message: "Profile verified successfully.",
+    });
+  } catch (err) {
+    console.error("Error verifying user:", err);
+
+    res.status(500).json({
+      error: "An internal server error occurred while verifying the user.",
+    });
+  }
+};
+
+
+
+exports.isLinkGenerated = async (req, res) => {
+  try {
+    // Find users who are verified but have not generated cross-promotion links
+    const existingLinks = await ListA.find({
+      isVerified: true,
+      isLinkSend: false,
+    });
+
+    if (existingLinks.length === 0) {
+      return res.status(200).json({
+        message: "No verified users without generated links.",
+      });
+    }
+
+    // Format the user details into a line-by-line string
+    const formattedUsers = existingLinks
+      .map(user => {
+        return `Discord ID: ${user.discordId}\nNewsletter Name: ${user.newsletterName}\nNiche: ${user.niche}\nLink: ${user.link}\n`;
+      })
+      .join("\n--------------------\n");
+
+    // Send the response with formatted user details
+    return res.status(200).send(
+      `Verified users without generated links:\n\n${formattedUsers}`
+    );
+  } catch (err) {
+    console.error("Error fetching users:", err);
+    res.status(500).json({
+      error: "An internal server error occurred while fetching the users.",
+    });
+  }
+};
+
+exports.isLinkVerfied = async (req, res) => {
+  const { discordId1, discordId2 } = req.body;
+  try {
+      const user1 = await ListA.findOne({ discordId: discordId1 });
+      const user2 = await ListA.findOne({ discordId: discordId2 });
+
+      if (!user1 || !user2) {
+          return res.status(404).json({
+              error: "One or both users do not exist.",
+          });
+      }
+
+      // Mark both users as having received the link
+      user1.isLinkSend = true;
+      user2.isLinkSend = true;
+
+      // Save changes to the database
+      await user1.save();
+      await user2.save();
+
+      res.status(200).json({
+          message: "Link Genarated and Sent successful.",
+      });
+  } catch (err) {
+      console.error("Error fetching user:", err);
+      res.status(500).json({
+          error: "An internal server error occurred while fetching the user.",
+      });
   }
 };

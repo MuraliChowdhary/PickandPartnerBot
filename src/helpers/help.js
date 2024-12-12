@@ -18,52 +18,65 @@ app.use(express.json());
 
 app.use("/api/admin", AdminRoutes);
 app.use("/api/", listARoutes);
-// app.use("/api/", listBRoutes);
 app.use("/api/utm", utmRoutes);
 
-// mongoose
-//   .connect(process.env.MONGODB_URI, {
-//     // useNewUrlParser: true,
-//     // useUnifiedTopology: true,
-//   })
-//   .then(() => {
-//     console.log("Database Connected Successfully");
-//   })
-//   .catch((err) => {
-//     console.error("Database connection error:", err);
-//   });
-
-// API routes
-app.use("/api/admin", AdminRoutes);
-app.use("/api/", listARoutes);
-// app.use("/api/", listBRoutes);
-app.use("/api/utm", utmRoutes);
+const commands = [
+  {
+    name: "cross_promote",
+    description:
+      "Collaborate with other creators to expand your audience. Share your links and build connections through mutual promotions.",
+  },
+  {
+    name: "register",
+    description: "Register your newsletter details.",
+  },
+  {
+    name: "edit_profile",
+    description: "Edit your newsletter registration details.",
+  },
+  {
+    name: "help",
+    description: "Get a list of available commands.",
+  },
+  {
+    name: "guidelines",
+    description: "View community guidelines.",
+  },
+  {
+    name: "feedback",
+    description: "Show feedback details and usage instructions.",
+  },
+  {
+    name: "submit_feedback",
+    description: "Submit your feedback about the bot.",
+  },
+  {
+    name: "issue",
+    description: "Report an issue. Usage: `/issue <your message>`",
+  },
+];
 
 async function handleHelp(interaction) {
   const helpMessage = new EmbedBuilder()
-    .setColor("#0062ff")
-    .setTitle("Help - Available Commands")
+    .setColor("#5865F2") // Discord's native blurple color for a professional look
+    .setTitle("🛠️ Help - Available Commands")
     .setDescription("Here are the commands you can use:")
-    .addFields(
-      {
-        name: "/register",
-        value: "Register your newsletter details. Usage: `/register <details>`",
-      },
-      {
-        name: "/cross-promote",
-        value:
-          "Generate a UTM link for cross-promotion. Usage: `/cross-promote`",
-      },
-      {
-        name: "/feedback",
-        value: "Send feedback about the bot. Usage: `/feedback <your message>`",
-      },
-      {
-        name: "/guidelines",
-        value: "View community guidelines. Usage: `/guidelines`",
-      }
-    )
-    .setFooter({ text: "For more help, type `/guidelines`." }); // Updated line
+    .setThumbnail(
+      "https://cdn-icons-png.flaticon.com/512/5404/5404957.png" // Optional thumbnail icon for extra flair
+    );
+
+  // Dynamically add fields for each command
+  commands.forEach((command) => {
+    helpMessage.addFields({
+      name: `/${command.name}`,
+      value: command.description,
+    });
+  });
+
+  helpMessage.setFooter({
+    text: "Need more assistance? Type `/guidelines` for detailed help.",
+    iconURL: "https://cdn-icons-png.flaticon.com/512/888/888879.png", // Optional footer icon
+  });
 
   await interaction.reply({ embeds: [helpMessage] });
 }

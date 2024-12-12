@@ -1,6 +1,7 @@
 require("dotenv").config();
 const fetch = (...args) =>
   import("node-fetch").then(({ default: fetch }) => fetch(...args));
+const { EmbedBuilder } = require("discord.js");
 
 const express = require("express");
 const mongoose = require("mongoose");
@@ -12,6 +13,7 @@ const utmRoutes = require("../../Routes/utmRoutes");
 const AdminRoutes = require("../../Routes/AdminRoutes");
 const CROSSPROMOTION_TRIGGER = process.env.WEBHOOK_URL_CROSSPROMOTION;
 
+const listA = require("../../Models/ListASchema");
 // Set up Express app
 const app = express();
 app.use(cors());
@@ -24,38 +26,51 @@ app.use("/api/", listARoutes);
 app.use("/api/utm", utmRoutes);
 
 async function handleCrossPromote(interaction) {
-  console.log("Hello");
-  const requiredRoleId = process.env.REQUIRED_ROLE_ID;
-  const member = interaction.member;
-
-  // // Uncomment if you want to restrict access based on role
-  // if (!member.roles.cache.has(requiredRoleId)) {
-  //   await interaction.reply({
-  //     content:
-  //       "Sorry, you don't have access to this feature yet. Try one of the following:\n" +
-  //       "1. Recheck your registration details\n" +
-  //       "2. Wait for an admin to approve your registration",
-  //     ephemeral: true,
-  //   });
-  //   return;
-  // }
-   
-
-  //fetch info of the user from db check the isVerified variable ? true =>> access :false sorry dont have permission
-
-  //isverified:crosspromotion: isEligible if false then make true
-  //***if isEligible is true: send message saying to wait***
-
-
-
-
   try {
-    await interaction.deferReply();  
-
+    // Fetch user verification status
     const discordId = interaction.user.id;
-    const username = interaction.user.username;
+    const response = await fetch(
+      `http://localhost:3030/api/isVerify?discordId=${discordId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        
+      }
+    );
 
-    // Fetch registration data
+    const textResponse = await response.json(); 
+    console.log(textResponse) 
+
+    if (!response.ok) {
+      console.error("Error response:", textResponse.message);   
+ 
+      await interaction.reply({
+        content:
+          "Sorry, you are not registered in the cross-promotion program. Please try /register for registration",
+        ephemeral: true,
+      });
+      return;
+    }
+
+     
+    const  verified = await textResponse.verified;
+
+    if (!verified) {
+      await interaction.reply({
+        content:
+          "Sorry, you don't have access to this feature yet. Try one of the following:\n" +
+          "1. Recheck your registration details\n" +
+          "2. Wait for an admin to approve your registration", 
+        ephemeral: true,
+      });
+      return;
+    }
+
+    // If verified, proceed to fetch user details
+    await interaction.deferReply();  // Defer the reply to allow followUp
+
     const responseData = await fetch(
       `http://localhost:3030/api/profile?discordId=${discordId}`,
       {
@@ -67,34 +82,44 @@ async function handleCrossPromote(interaction) {
     );
 
     if (!responseData.ok) {
-      throw new Error(`Error fetching registration data: ${responseData.statusText}`);
+      throw new Error(
+        `Error fetching profile data: ${responseData.statusText}`
+      );
     }
 
     const dataMess = await responseData.json();
     const { niche, subscribers, newsletterName, link } = dataMess;
-    const additionalInfo = "Your additional info here"; // Set any additional info if needed
+    const additionalInfo = "Your additional info here";
 
-    // Construct the webhook payload including additional information
+    // Construct the webhook payload
     const webhookPayload = {
-      content:
-        `🔗 **Cross Promotion Request** 📢\n` +
-        `---\n` +
-        `**User Details**:\n` +
-        `**Discord ID:** ${discordId}\n` +
-        `**Username:** ${username}\n` +
-        `---\n` +
-        `**Newsletter Info**:\n` +
-        `**Niche:** ${niche}\n` +
-        `**Subscribers:** ${subscribers}\n` +
-        `**Newsletter Name:** ${newsletterName}\n` +
-        `**Link:** [Visit Newsletter](${link})\n` +
-        `**Additional Information:** ${additionalInfo}\n` +
-        `---\n` +
-        `*This request was made at ${new Date().toLocaleString()}*`,
+      embeds: [
+        new EmbedBuilder()
+          .setColor(0x00b0f4) // Blue color for professionalism
+          .setTitle("🔗 **Cross Promotion Request** 📢")
+          .setDescription(
+            `**User Details**:\n` +
+            `**Discord ID:** ${discordId}\n` +
+            `**Username:** ${interaction.user.username}\n` +
+            `---\n` +
+            `**Newsletter Info**:\n` +
+            `**Niche:** ${niche}\n` +
+            `**Subscribers:** ${subscribers}\n` +
+            `**Newsletter Name:** ${newsletterName}\n` +
+            `**Link:** [Visit Newsletter](${link})\n` +
+            `**Additional Information:** ${additionalInfo}\n` +
+            `---\n` +
+            `*This request was made at ${new Date().toLocaleString()}*`
+          )
+          .setFooter({
+            text: "Please review the request and take necessary action.",
+          })
+          .setTimestamp(),
+      ],
     };
 
     // Send the webhook
-    const response2 = await fetch(CROSSPROMOTION_TRIGGER, {
+    const webhookResponse = await fetch(CROSSPROMOTION_TRIGGER, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -102,11 +127,11 @@ async function handleCrossPromote(interaction) {
       body: JSON.stringify(webhookPayload),
     });
 
-    if (!response2.ok) {
-      throw new Error(`Error sending webhook: ${response2.statusText}`);
+    if (!webhookResponse.ok) {
+      throw new Error(`Error sending webhook: ${webhookResponse.statusText}`);
     }
 
-    // Confirmation message to the user
+    // Confirmation message
     await interaction.followUp(
       "✅ **Your cross-promotion request has been submitted!**\n\nOur team will contact you shortly. Thank you! 🚀"
     );
@@ -117,6 +142,7 @@ async function handleCrossPromote(interaction) {
     );
   }
 }
+
 
 
 module.exports = { handleCrossPromote };

@@ -41,42 +41,48 @@ app.use("/api/utm", utmRoutes);
 
 async function handleGuidelines(interaction) {
   const guidelinesMessage = new EmbedBuilder()
-    .setColor("#0099ff") // Standard blue color
-    .setTitle("Community Guidelines")
+    .setColor("#1ABC9C") // A soothing teal color for professionalism and calmness
+    .setTitle("📜 Community Guidelines")
     .setDescription(
-      "Please follow these guidelines to ensure a positive experience:"
+      "Please follow these guidelines to ensure a positive and inclusive experience for everyone:"
+    )
+    .setThumbnail(
+      "https://cdn-icons-png.flaticon.com/512/1048/1048941.png" // Represents guidelines or community rules
     )
     .addFields(
       {
-        name: "1.Respect Others",
-        value: "Be respectful and courteous when interacting with others.",
+        name: "1️⃣ Respect Others",
+        value: "Treat everyone with respect and courtesy while interacting.",
       },
       {
-        name: "2.Use Commands Properly",
+        name: "2️⃣ Use Commands Properly",
         value:
-          "Avoid misuse of commands to ensure smooth operation for everyone.",
+          "Ensure that commands are used appropriately to maintain a smooth operation for all users.",
       },
       {
-        name: "3.Provide Constructive Feedback",
+        name: "3️⃣ Provide Constructive Feedback",
         value:
-          "Feedback should be constructive, relevant, and aimed at improving the bot.",
+          "Submit constructive and actionable feedback using `/submit_feedback <your message>` to help improve the bot.",
       },
       {
-        name: "4.Ask Questions",
+        name: "4️⃣ Ask Questions",
         value:
-          "If you have questions, ask in the designated channels or use `/help`.",
+          "If you have any questions, use the appropriate channels or type `/help` for assistance.",
       },
       {
-        name: "5.Report Issues",
+        name: "5️⃣ Report Issues",
         value:
-          "Report any issues with `/feedback` to help us maintain a great experience.",
+          "Report any problems with the bot using `/issue <your message>` so we can address them promptly.",
       }
     )
     .setFooter({
-      text: "Thank you for helping us maintain a positive community.",
+      text: "Your cooperation helps us build a great community.",
+      iconURL: "https://cdn-icons-png.flaticon.com/512/190/190411.png", // Optional footer icon for extra polish
     });
 
   await interaction.reply({ embeds: [guidelinesMessage] });
 }
 
 module.exports = { handleGuidelines };
+
+

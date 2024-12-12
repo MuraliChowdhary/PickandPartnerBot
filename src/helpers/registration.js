@@ -10,7 +10,7 @@ const cors = require("cors");
 const listARoutes = require("../../Routes/listARoutes");
 const utmRoutes = require("../../Routes/utmRoutes");
 const AdminRoutes = require("../../Routes/AdminRoutes");
- 
+
 const REGISTRATION_NOTIFIER = process.env.REGISTRATION_NOTIFIER;
 
 const app = express();
@@ -47,9 +47,7 @@ async function handleRegister(interaction) {
     } else if (!newsletterData.subscribers) {
       const subscriberCount = parseInt(userMessage, 10);
       if (isNaN(subscriberCount)) {
-        await interaction.followUp(
-          "Please enter a valid number for subscribers:"
-        );
+        await interaction.followUp("Please enter a valid number for subscribers:");
       } else {
         newsletterData.subscribers = subscriberCount;
         await interaction.followUp("Please provide a link to your newsletter:");
@@ -58,55 +56,62 @@ async function handleRegister(interaction) {
       const urlPattern =
         /^(https?:\/\/)?([\w-]+(\.[\w-]+)+)(:[0-9]{1,5})?(\/.*)?$/i;
       if (!urlPattern.test(userMessage)) {
-        await interaction.followUp(
-          "Please provide a valid URL for your newsletter:"
-        );
+        await interaction.followUp("Please provide a valid URL for your newsletter:");
       } else {
         newsletterData.link = userMessage;
         collector.stop();
 
-        const response = await fetch("http://localhost:3030/api/register", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(newsletterData),
-        });
-
-        if (response.ok) {
-          await interaction.followUp({
-            content: "Registration successful!",
-          });
-        
-       // verification triggering ok  add button
-       // db isVerified:true
-
-       
-
-          const webhookPayload = {
-            content:
-              `📋 **Registration Notifier**\n` +
-              `---------------------------\n` +
-              `**User Details:**\n` +
-              `- Discord ID: ${newsletterData.discordId}\n` +
-              `- Newsletter Name: ${newsletterData.newsletterName}\n` +
-              `---------------------------\n` +
-              `**Newsletter Info:**\n` +
-              `- Niche: ${newsletterData.niche}\n` +
-              `- Subscribers: ${newsletterData.subscribers}\n` +
-              `- Link: ${newsletterData.link}`,
-          };
-
-          await fetch(REGISTRATION_NOTIFIER, {
+        try {
+          const response = await fetch("http://localhost:3030/api/register", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              content: webhookPayload.content,
-            }),
+            body: JSON.stringify(newsletterData),
           });
-        } else {
-          await interaction.followUp(
-            response.message +
-              "Failed to save your details. Please try again later."
-          );
+
+          if (response.ok) {
+            await interaction.followUp({
+              content: "Registration successful!",
+            });
+
+            // Verification triggering
+            // db isVerified:true
+
+            const webhookPayload = {
+              embeds: [
+                {
+                  color: 0x00ff00, // Green color
+                  title: "📋 Registration Notifier",
+                  description: "Details of the new registration:",
+                  fields: [
+                    {
+                      name: "User Details",
+                      value: `- **Discord ID:** ${newsletterData.discordId}\n- **Newsletter Name:** ${newsletterData.newsletterName}`,
+                    },
+                    {
+                      name: "Newsletter Info",
+                      value: `- **Niche:** ${newsletterData.niche}\n- **Subscribers:** ${newsletterData.subscribers}\n- **Link:** [Visit Newsletter](${newsletterData.link})`,
+                    },
+                  ],
+                  footer: {
+                    text: "Notifier Bot",
+                  },
+                  timestamp: new Date().toISOString(),
+                },
+              ],
+            };
+
+            await fetch(REGISTRATION_NOTIFIER, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(webhookPayload),
+            });
+          } else {
+            const errorData = await response.json();
+            await interaction.followUp(`Error: ${errorData.message || "Failed to save your details. Please try again later."}`);
+          }
+        } catch (error) {
+          await interaction.followUp("An unexpected error occurred. Please try again later.");
+          console.error("Error in registration:", error);
         }
       }
     }
@@ -118,6 +123,7 @@ async function handleRegister(interaction) {
     }
   });
 }
+
 
 // Export the handleRegister function
 module.exports = { handleRegister };

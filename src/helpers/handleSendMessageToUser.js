@@ -26,32 +26,44 @@ app.use("/api/utm", utmRoutes);
 
 
 
-async function handleSendMessageToUser(interaction,client) {
-    const discordId = interaction.options.getString("discord_id"); // Get the Discord ID from options
-    const message = interaction.options.getString("message"); // Get the message from options
-  
-    try {
-      // Fetch the user by their Discord ID
-      const user = await client.users.fetch(discordId);
-  
-      // Send the message to the user
-      await user.send(message);
-  
-      // Acknowledge the interaction with a success message
-      await interaction.reply({
-        content: `Message successfully sent to <@${discordId}>!`,
-        ephemeral: true,
-      });
-    } catch (error) {
-      console.error("Error sending message:", error);
-      // Send an error message if something goes wrong
-      await interaction.reply({
-        content: `Failed to send message to <@${discordId}>. Please check the Discord ID and try again.`,
-        ephemeral: true,
-      });
-    }
-  }
+const { EmbedBuilder } = require("discord.js");
 
-  module.exports = {
-    handleSendMessageToUser
+async function handleSendMessageToUser(interaction, client) {
+  const discordId = interaction.options.getString("discord_id"); // Get the Discord ID from options
+  const message = interaction.options.getString("message"); // Get the message from options
+
+  try {
+    // Fetch the user by their Discord ID
+    const user = await client.users.fetch(discordId);
+
+    // Create a rich embed message
+    const embedMessage = new EmbedBuilder()
+      .setColor(0x00ff00) // Green color for positive feedback
+      .setTitle("📝 **Message from Admin**") // Title of the message
+      .setDescription(message) // The actual content of the message
+      .setFooter({ text: "If you have any questions, feel free to ask!" }) // Footer message
+      .setTimestamp(); // Timestamp to show when the message was sent
+
+    // Send the embed message to the user
+    await user.send({ embeds: [embedMessage] });
+
+    // Acknowledge the interaction with a success message
+    await interaction.reply({
+      content: `Message successfully sent to <@${discordId}>!`,
+      ephemeral: true,
+    });
+  } catch (error) {
+    console.error("Error sending message:", error);
+    // Send an error message if something goes wrong
+    await interaction.reply({
+      content: `Failed to send message to <@${discordId}>. Please check the Discord ID and try again.`,
+      ephemeral: true,
+    });
   }
+}
+
+module.exports = {
+  handleSendMessageToUser,
+};
+
+ 

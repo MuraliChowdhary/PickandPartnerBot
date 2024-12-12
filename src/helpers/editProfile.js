@@ -36,10 +36,11 @@ app.use("/api/", listARoutes);
 app.use("/api/utm", utmRoutes);
 
 async function handleEditProfile(interaction) {
-   console.log("hello")
+  console.log("hello");
   const discordId = interaction.user.id;
   let profile;
 
+  // Function to fetch profile
   async function fetchProfile() {
     const response = await fetch(
       `http://localhost:3030/api/profile?discordId=${discordId}`,
@@ -52,6 +53,7 @@ async function handleEditProfile(interaction) {
     return await response.json();
   }
 
+  // Function to update profile
   async function updateProfile(field, value) {
     const response = await fetch("http://localhost:3030/api/update-profile", {
       method: "PUT",
@@ -62,6 +64,7 @@ async function handleEditProfile(interaction) {
     return await response.json();
   }
 
+  // Function to display profile
   async function displayProfile() {
     const fields = [
       { name: "Newsletter Name", value: profile.newsletterName },
@@ -82,7 +85,14 @@ async function handleEditProfile(interaction) {
 
   try {
     profile = await fetchProfile();
-    await displayProfile();
+
+    // Send the initial reply to the interaction
+    await interaction.reply({
+      content: "Loading your profile...",
+      ephemeral: true, // Optional: hides the message from others
+    });
+
+    await displayProfile(); // Display profile
 
     const filter = (response) => response.author.id === interaction.user.id;
 
@@ -157,11 +167,12 @@ async function handleEditProfile(interaction) {
         "An error occurred while editing your profile. Please try again later."
       );
     } else {
-      await interaction.editReply(
+      await interaction.reply(
         "An error occurred while fetching your profile. Please try again later."
       );
     }
   }
 }
+
 
 module.exports = { handleEditProfile };
