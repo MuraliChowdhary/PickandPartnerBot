@@ -47,7 +47,9 @@ async function handleRegister(interaction) {
     } else if (!newsletterData.subscribers) {
       const subscriberCount = parseInt(userMessage, 10);
       if (isNaN(subscriberCount)) {
-        await interaction.followUp("Please enter a valid number for subscribers:");
+        await interaction.followUp(
+          "Please enter a valid number for subscribers:"
+        );
       } else {
         newsletterData.subscribers = subscriberCount;
         await interaction.followUp("Please provide a link to your newsletter:");
@@ -56,7 +58,9 @@ async function handleRegister(interaction) {
       const urlPattern =
         /^(https?:\/\/)?([\w-]+(\.[\w-]+)+)(:[0-9]{1,5})?(\/.*)?$/i;
       if (!urlPattern.test(userMessage)) {
-        await interaction.followUp("Please provide a valid URL for your newsletter:");
+        await interaction.followUp(
+          "Please provide a valid URL for your newsletter:"
+        );
       } else {
         newsletterData.link = userMessage;
         collector.stop();
@@ -70,7 +74,8 @@ async function handleRegister(interaction) {
 
           if (response.ok) {
             await interaction.followUp({
-              content: "Registration successful!",
+              content:
+                "🎉 Registration successful!\n\nOur team is reviewing your data, and once verified, you'll be eligible for cross-promotion. We'll notify you as soon as the verification process is complete. Thank you for your patience!",
             });
 
             // Verification triggering
@@ -107,10 +112,17 @@ async function handleRegister(interaction) {
             });
           } else {
             const errorData = await response.json();
-            await interaction.followUp(`Error: ${errorData.message || "Failed to save your details. Please try again later."}`);
+            await interaction.followUp(
+              `Error: ${
+                errorData.message ||
+                "Failed to save your details. Please try again later."
+              }`
+            );
           }
         } catch (error) {
-          await interaction.followUp("An unexpected error occurred. Please try again later.");
+          await interaction.followUp(
+            "An unexpected error occurred. Please try again later."
+          );
           console.error("Error in registration:", error);
         }
       }
@@ -123,7 +135,6 @@ async function handleRegister(interaction) {
     }
   });
 }
-
 
 // Export the handleRegister function
 module.exports = { handleRegister };

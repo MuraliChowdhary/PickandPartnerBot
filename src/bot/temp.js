@@ -19,9 +19,10 @@ const { handleRegister } = require("../helpers/registration");
 const { handleEditProfile } = require("../helpers/editProfile");
 const { handleCrossPromote } = require("../helpers/crosspromotion");
 const { handleHelp } = require("../helpers/help");
-const { trackUrlClicks, sendDailyDM } = require('../helpers/utmMonitor'); // Import trackUrlClicks and sendDailyDM
-const {handleVerified}  =require("../helpers/handleVerify")
-const {handleLinkSend} = require("../helpers/handleLinkSend")
+const { trackUrlClicks, sendDailyDM } = require("../helpers/utmMonitor"); // Import trackUrlClicks and sendDailyDM
+const { handleVerified } = require("../helpers/handleVerify");
+const { handleLinkSend } = require("../helpers/handleLinkSend");
+const {handleProfile} = require("../helpers/handleProfile")
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -30,7 +31,7 @@ app.use(express.json());
 Promise.all([mainDb.asPromise(), secondaryDb.asPromise()])
   .then(() => {
     console.log("Both databases connected successfully!");
-    
+
     // Initialize the change stream and start monitoring for clicks
     trackUrlClicks(secondaryDb);
 
@@ -48,7 +49,6 @@ Promise.all([mainDb.asPromise(), secondaryDb.asPromise()])
     console.error("Error connecting to databases:", error);
     process.exit(1); // Exit the process if database connections fail
   });
-
 
 // API routes
 app.use("/api/admin", AdminRoutes);
@@ -77,6 +77,7 @@ const { handleSendUtmLinks } = require("../helpers/utmtracking");
 const {
   handleSendMessageToUser,
 } = require("../helpers/handleSendMessageToUser");
+const {handleAdmincmd} = require("../helpers/handleAdmincmd")
 // Set up the Discord client with the required intents
 const client = new Client({
   intents: [
@@ -165,7 +166,8 @@ const commands = [
       {
         type: 3,
         name: "discord_id",
-        description: "The Discord ID of the user you want to send a message to.",
+        description:
+          "The Discord ID of the user you want to send a message to.",
         required: true,
       },
       {
@@ -194,9 +196,26 @@ const commands = [
     description: "Fetch the details of users whose links are not generated.",
     restricted: true, // Admin only
   },
+  {
+    name: "admincmd",
+    description: "Get a list of available Admin commands.",
+    restricted: true, // Admin only
+  },
+  {
+    name: "profile",
+    description: "Get details of the user",
+    restricted: true, // Admin only
+    options: [
+      {
+        type: 3,
+        name: "discord_id",
+        description: "The Discord ID of the user to verify.",
+        required: true,
+      },
+    ],
+  },
+
 ];
-
-
 
 const rest = new REST({ version: "9" }).setToken(
   process.env.DISCORDJS_BOT_TOKEN
@@ -221,13 +240,14 @@ client.once("ready", () => {
 client.on("guildMemberAdd", async (member) => {
   console.log(`New member joined: ${member.user.username}`);
   const webhook_payload = {
-     content: `📋 **User Joined Notifier**\n` +
-    `---------------------------\n` +
-    `**User Details:**\n` +
-    `Discord ID: ${member.user.id}\n` +  
-    `Username: ${member.user.username}\n` +  
-    `---------------------------\n` 
-  }
+    content:
+      `📋 **User Joined Notifier**\n` +
+      `---------------------------\n` +
+      `**User Details:**\n` +
+      `Discord ID: ${member.user.id}\n` +
+      `Username: ${member.user.username}\n` +
+      `---------------------------\n`,
+  };
 
   async function sendUserjoined() {
     try {
@@ -247,7 +267,7 @@ client.on("guildMemberAdd", async (member) => {
       console.error("Error with the webhook:", error.message);
     }
   }
-  
+
   try {
     if (member.user.dmChannel) {
       console.log("DM channel already exists"); // Log if DM channel exists
@@ -271,8 +291,9 @@ client.on("guildMemberAdd", async (member) => {
 
   try {
     const welcomeChannel = member.guild.channels.cache.find(
-      (channel) => channel.name === welcome-and-rules);
-    console.log("channel:" + member.guild.channels.cache)
+      (channel) => channel.name === welcome - and - rules
+    );
+    console.log("channel:" + member.guild.channels.cache);
 
     if (welcomeChannel) {
       await welcomeChannel.send(
@@ -285,27 +306,36 @@ client.on("guildMemberAdd", async (member) => {
       );
       console.log("Welcome message sent to the welcome-and-rules channel.");
     } else {
-      console.warn(`Channel "${welcome-and-rules}" not found. Skipping welcome message.`);
+      console.warn(
+        `Channel "${
+          welcome - and - rules
+        }" not found. Skipping welcome message.`
+      );
     }
   } catch (error) {
-    console.error("Error sending welcome message to the channel:", error.message);
+    console.error(
+      "Error sending welcome message to the channel:",
+      error.message
+    );
   }
 });
 
 // Bot interaction event
 const adminIds = [process.env.ADMIN_DISCORD_ID]; // List of admin Discord IDs
- 
+
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isCommand()) return;
 
   const userId = interaction.user.id;
 
   try {
-    console.log(`Command received: ${interaction.commandName} by User ID: ${userId}`);
+    console.log(
+      `Command received: ${interaction.commandName} by User ID: ${userId}`
+    );
 
     // Check if the command is issued in a DM or in a channel
     const isInDM = interaction.channel.type === 1;
-    console.log(interaction.channel.type)
+    console.log(interaction.channel.type);
     // For non-admin users, commands should only work in DMs
     if (!isInDM && !adminIds.includes(userId)) {
       await interaction.reply({
@@ -331,7 +361,9 @@ Server channels are meant for discussions and idea sharing, not command interact
     } else if (interaction.commandName === "send_utm_links") {
       // Admin-only check
       if (!adminIds.includes(userId)) {
-        console.warn(`Unauthorized access attempt by User ID: ${userId} for admin-only command: send_utm_links`);
+        console.warn(
+          `Unauthorized access attempt by User ID: ${userId} for admin-only command: send_utm_links`
+        );
         await interaction.reply({
           content: "❌ You do not have permission to use this command.",
           ephemeral: true,
@@ -350,7 +382,9 @@ Server channels are meant for discussions and idea sharing, not command interact
     } else if (interaction.commandName === "send_message_to_user") {
       // Admin-only check
       if (!adminIds.includes(userId)) {
-        console.warn(`Unauthorized access attempt by User ID: ${userId} for admin-only command: send_message_to_user`);
+        console.warn(
+          `Unauthorized access attempt by User ID: ${userId} for admin-only command: send_message_to_user`
+        );
         await interaction.reply({
           content: "❌ You do not have permission to use this command.",
           ephemeral: true,
@@ -362,7 +396,9 @@ Server channels are meant for discussions and idea sharing, not command interact
       await handleIssue(interaction);
     } else if (interaction.commandName === "verify") {
       if (!adminIds.includes(userId)) {
-        console.warn(`Unauthorized access attempt by User ID: ${userId} for admin-only command: verify`);
+        console.warn(
+          `Unauthorized access attempt by User ID: ${userId} for admin-only command: verify`
+        );
         await interaction.reply({
           content: "❌ You do not have permission to use this command.",
           ephemeral: true,
@@ -371,8 +407,47 @@ Server channels are meant for discussions and idea sharing, not command interact
       }
       await handleVerified(interaction);
     } else if (interaction.commandName === "link") {
+      if (!adminIds.includes(userId)) {
+        console.warn(
+          `Unauthorized access attempt by User ID: ${userId} for admin-only command: verify`
+        );
+        await interaction.reply({
+          content: "❌ You do not have permission to use this command.",
+          ephemeral: true,
+        });
+        return;
+      }
       await handleLinkSend(interaction);
-    } else {
+    } else if (interaction.commandName === "admincmd") {
+      if (!adminIds.includes(userId)) {
+        console.warn(
+          `Unauthorized access attempt by User ID: ${userId} for admin-only command: admincmd`
+        );
+        await interaction.reply({
+          content: "❌ You do not have permission to use this command.",
+          ephemeral: true,
+        });
+        return;
+      }
+      await handleAdmincmd(interaction);
+    } 
+
+    else if (interaction.commandName === "profile") {
+      if (!adminIds.includes(userId)) {
+        console.warn(
+          `Unauthorized access attempt by User ID: ${userId} for admin-only command: profile`
+        );
+        await interaction.reply({
+          content: "❌ You do not have permission to use this command.",
+          ephemeral: true,
+        });
+        return;
+      }
+      await handleProfile(interaction);
+    } 
+    
+    
+    else {
       console.log(`Unrecognized command: ${interaction.commandName}`);
       await interaction.reply({
         content: "❌ Command not recognized.",
@@ -387,8 +462,6 @@ Server channels are meant for discussions and idea sharing, not command interact
     });
   }
 });
-
-
 
 client.login(process.env.DISCORDJS_BOT_TOKEN);
 module.exports = {
