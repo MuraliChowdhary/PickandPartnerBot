@@ -56,6 +56,11 @@ app.use("/api/", listARoutes);
 // app.use("/api/", listBRoutes);
 app.use("/api/utm", utmRoutes);
 
+
+app.get('/health', (req, res) => {
+  res.status(200).send('Bot is alive and running!');
+});
+
 const { REST } = require("@discordjs/rest");
 const { Routes } = require("discord-api-types/v9");
 const {

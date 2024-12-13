@@ -70,7 +70,7 @@ async function handleProfile(interaction) {
       content: "An error occurred while fetching the user profile.",
       ephemeral: true,
     });
-  }
+  } 
 }
 
 module.exports = { handleProfile };
