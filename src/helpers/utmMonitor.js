@@ -156,8 +156,8 @@ const sendDailyDM = async () => {
     }
   };
   
-  // Schedule the task to run at 9:30 PM for testing
-//   cron.schedule('29 23 * * *', sendDailyDM);  
+  //Schedule the task to run at 9:30 PM for testing
+//   cron.schedule('45 21 * * *', sendDailyDM);  
   
 //   console.log('Cron job set to send daily DMs at 9:30 PM for testing.');
   
