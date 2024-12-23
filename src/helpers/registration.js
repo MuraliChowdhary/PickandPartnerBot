@@ -30,7 +30,7 @@ async function handleRegister(interaction) {
     const filter = (response) => response.author.id === interaction.user.id;
     const collector = interaction.channel.createMessageCollector({
       filter,
-      time: 60000,
+      time: 180000,
     });
 
     let newsletterData = { discordId: interaction.user.id };
