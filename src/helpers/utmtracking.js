@@ -52,37 +52,35 @@ async function isUserVerified(discordId) {
 }
 
 async function fetchAdCopy(discordId1, discordId2) {
-    const url = `http://localhost:3030/api/copyAD?discordId1=${discordId1}&discordId2=${discordId2}`;
-    
-    try {
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-  
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to fetch ad copy.");
-      }
-  
-      const data = await response.json();
-      const { copyText1, copyText2 } = data;
-  
-      if (!copyText1 || !copyText2) {
-        throw new Error("Incomplete response data received from the server.");
-      }
-  
-      return { copyText1, copyText2 };
-    } catch (error) {
-      console.error("Error fetching ad copy:", error.message);
-      throw error; // Re-throw the error for higher-level handling
+  const url = `http://localhost:3030/api/copyAD?discordId1=${discordId1}&discordId2=${discordId2}`;
+
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Failed to fetch ad copy.");
     }
+
+    const data = await response.json();
+    const { copyText1, copyText2 } = data;
+
+    if (!copyText1 || !copyText2) {
+      throw new Error("Incomplete response data received from the server.");
+    }
+
+    return { copyText1, copyText2 };
+  } catch (error) {
+    console.error("Error fetching ad copy:", error.message);
+    throw error; // Re-throw the error for higher-level handling
   }
-  
-  
-  
+}
+
 async function handleSendUtmLinks(client, interaction) {
   try {
     await interaction.deferReply({ ephemeral: true });
@@ -159,7 +157,7 @@ async function handleSendUtmLinks(client, interaction) {
         return null;
       }
     }
-    
+
     const [shortUrl1, shortUrl2] = await Promise.all([
       getShortUrl(utmLink1),
       getShortUrl(utmLink2),
@@ -175,45 +173,38 @@ async function handleSendUtmLinks(client, interaction) {
     await interaction.editReply(statusMessage);
 
     const { copyText1, copyText2 } = await fetchAdCopy(discordId1, discordId2);
-    if(!copyText1 || !copyText2){
-        await interaction.editReply(`${statusMessage}Error: Failed to fetch ad copy.`);
+    if (!copyText1 || !copyText2) {
+      await interaction.editReply(
+        `${statusMessage}Error: Failed to fetch ad copy.`
+      );
     }
 
     statusMessage += "Sending DMs...\n";
     await interaction.editReply(statusMessage);
 
-    const message1 = `
-    Found you a perfect match.
-    
-    This is a combined effort. They got your details.
-    
-    You promote them, they will promote you.
-    
-    Copy:
-    ${copyText2}
-    
-    Unique Link: 
-    ${shortUrl1}
+            const message1 = `Found you a perfect match.
 
-    For any queries, use /talk_to_admin command\n\n
-      `;
+        This is a combined effort. They got your details.
 
-      const message2 = `
-      Found you a perfect match.
-      
+        You promote them, they will promote you.
+
+        Copy: ${copyText2}
+        Unique Link: ${shortUrl1}
+
+        For any queries, use /talk_to_admin command
+        `;
+
+    const message2 = `Found you a perfect match.
+
       This is a combined effort. They got your details.
       
       You promote them, they will promote you.
       
-      Copy:
-      ${copyText1}
+      Copy: ${copyText1}
+      Unique Link: ${shortUrl2}
       
-      Unique Link: 
-      ${shortUrl2}
-
-      For any queries, use /talk_to_admin command.\n\n
-
-        `;
+      For any queries, use /talk_to_admin command
+      `;
 
     const dmResults = await Promise.allSettled([
       sendDM(client, discordId1, `${message1} `),
