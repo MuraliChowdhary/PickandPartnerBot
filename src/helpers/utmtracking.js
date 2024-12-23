@@ -182,29 +182,29 @@ async function handleSendUtmLinks(client, interaction) {
     statusMessage += "Sending DMs...\n";
     await interaction.editReply(statusMessage);
 
-            const message1 = `Found you a perfect match.
+            const message1 = `Found you a perfect match.\n\n`+
 
-        This is a combined effort. They got your details.
+        `This is a combined effort. They got your details.\n\n`+
 
-        You promote them, they will promote you.
+        `You promote them, they will promote you.\n\n`+
 
-        Copy: ${copyText2}
-        Unique Link: ${shortUrl1}
+        `Copy:\n` `${copyText2}\n\n`+
+        `Unique Link:\n` `${shortUrl1}\n\n`+
 
-        For any queries, use /talk_to_admin command
-        `;
+        `For any queries, use /talk_to_admin command\n\n`
+        ;
 
-    const message2 = `Found you a perfect match.
+        const message2 = `Found you a perfect match.\n\n`+
 
-      This is a combined effort. They got your details.
-      
-      You promote them, they will promote you.
-      
-      Copy: ${copyText1}
-      Unique Link: ${shortUrl2}
-      
-      For any queries, use /talk_to_admin command
-      `;
+        `This is a combined effort. They got your details.\n\n`+
+
+        `You promote them, they will promote you.\n\n`+
+
+        `Copy:\n` `${copyText1}\n\n`+
+        `Unique Link:\n` `${shortUrl2}\n\n`+
+
+        `For any queries, use /talk_to_admin command\n\n`
+        ;
 
     const dmResults = await Promise.allSettled([
       sendDM(client, discordId1, `${message1} `),
