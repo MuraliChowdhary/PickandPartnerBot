@@ -194,6 +194,8 @@ async function handleSendUtmLinks(client, interaction) {
     
     Unique Link: 
     ${shortUrl1}
+
+    For any queries, use /talk_to_admin command\n\n
       `;
 
       const message2 = `
@@ -207,12 +209,15 @@ async function handleSendUtmLinks(client, interaction) {
       ${copyText1}
       
       Unique Link: 
-      ${shortUrl2} \n\n
+      ${shortUrl2}
+
+      For any queries, use /talk_to_admin command.\n\n
+
         `;
 
     const dmResults = await Promise.allSettled([
-      sendDM(client, discordId1, `Here is your Promotion Link: ${message1} `),
-      sendDM(client, discordId2, `Here is your Promotion Link: ${message2}`),
+      sendDM(client, discordId1, `${message1} `),
+      sendDM(client, discordId2, `${message2}`),
     ]);
 
     const failedDms = dmResults.filter(
