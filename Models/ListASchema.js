@@ -69,6 +69,12 @@ const ListASchema = new mongoose.Schema({
     totalClicks: { type: Number, default: 0, min: [0, 'Clicks cannot be negative.'] },
     uniqueClicks: { type: Number, default: 0, min: [0, 'Unique clicks cannot be negative.'] },
   },
+  copyText:{
+    type: String,
+    default: '',
+    required:true
+
+  }
 });
 
 

@@ -62,7 +62,7 @@ async function handleCrossPromote(interaction) {
         content:
           "Sorry, you don't have access to this feature yet. Try one of the following:\n" +
           "1. Recheck your registration details\n" +
-          "2. Wait for an admin to approve your registration", 
+          "2. Wait for an admin to approve your registration\n\n", 
         ephemeral: true,
       });
       return;
@@ -133,7 +133,9 @@ async function handleCrossPromote(interaction) {
 
     // Confirmation message
     await interaction.followUp(
-      "✅ **Your cross-promotion request has been submitted!**\n\nOur team will contact you shortly. Thank you! 🚀"
+      "Finding you the best match\n\n"+
+
+      "We will send you the promotion details\n\n"
     );
   } catch (error) {
     console.error("Error in handleCrossPromote:", error);

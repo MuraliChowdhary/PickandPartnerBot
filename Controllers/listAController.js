@@ -3,10 +3,11 @@ const mongoose = require("mongoose");
 
 exports.addToListA = async (req, res) => {
   try {
-    const { discordId, newsletterName, niche, subscribers, link } = req.body;
+    const { discordId, newsletterName, niche, subscribers, link ,copyText} = req.body;
+    console.log(req.body)
 
     // Validate input
-    if (!discordId || !newsletterName || !niche || !subscribers || !link) {
+    if (!discordId || !newsletterName || !niche || !subscribers || !link || !copyText) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -38,6 +39,7 @@ exports.addToListA = async (req, res) => {
       niche,
       subscribers: subscriberCount,
       link,
+      copyText:copyText
     });
 
     await newEntry.save();
@@ -262,5 +264,40 @@ exports.isLinkVerfied = async (req, res) => {
       res.status(500).json({
           error: "An internal server error occurred while fetching the user.",
       });
+  }
+};
+
+exports.copyText = async (req, res) => {
+  const { discordId1, discordId2 } = req.query;
+
+  if (!discordId1 || !discordId2) {
+    return res.status(400).json({
+      error: "Both discordId1 and discordId2 are required.",
+    });
+  }
+
+  try {
+    console.log("Fetching users for IDs:", discordId1, discordId2);
+
+    const [user1, user2] = await Promise.all([
+      ListA.findOne({ discordId: discordId1 }),
+      ListA.findOne({ discordId: discordId2 }),
+    ]);
+
+    if (!user1 || !user2) {
+      return res.status(404).json({
+        error: "One or both users do not exist.",
+      });
+    }
+
+    return res.status(200).json({
+      copyText1: user1.copyText,
+      copyText2: user2.copyText,
+    });
+  } catch (err) {
+    console.error("Error fetching users:", err);
+    return res.status(500).json({
+      error: "An internal server error occurred while fetching the users.",
+    });
   }
 };

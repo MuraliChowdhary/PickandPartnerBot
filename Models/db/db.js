@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+  const mongoose = require('mongoose');
 
 // Main database (CrossPromotion)
 const mainDb = mongoose.createConnection(process.env.MAIN_DB, {

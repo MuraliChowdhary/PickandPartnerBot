@@ -42,12 +42,9 @@ const commands = [
     name: "guidelines",
     description: "View community guidelines.",
   },
+  
   {
-    name: "feedback",
-    description: "Show feedback details and usage instructions.",
-  },
-  {
-    name: "submit_feedback",
+    name: "talk_to_admin",
     description: "Submit your feedback about the bot.",
   },
   {

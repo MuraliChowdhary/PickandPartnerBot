@@ -91,25 +91,14 @@ async function handleVerified(interaction) {
             ephemeral: true,
           });
       
-          // Send a DM with the verification success message
           const message = {
-            embeds: [
-              {
-                color: 0x00ff00, // Green color for success
-                title: "✅ Verification Complete!",
-                description: `
-      **Congratulations! You are now verified and eligible to use the CrossPromote feature! 🎉**
-      
-      You can now perform cross-promotions and utilize the **/cross-promote** command to boost your presence. 🚀
-      
-      Enjoy and start promoting with confidence! 🙌
-      
-      - **The CrossPromotion Team**`,
-                footer: {
-                  text: "Happy Promoting! ✨",
-                },
-              },
-            ],
+            content: `🟢 You are Verified\n\n`+
+          
+          `There are a few magic commands to try:\n\n`+
+          
+          `/cross-promote -  Promote other newsletters and let others promote yours in return!\n\n`+
+          `/talk_to_admin - We are open to discuss anything\n\n`+
+          `/edit_profile\n\n`
           };
       
           await sendDM(client, discordId, message);
