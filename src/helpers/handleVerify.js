@@ -101,7 +101,7 @@ async function handleVerified(interaction) {
           `/edit_profile\n\n`
           };
       
-          await sendDM(client, discordId, message);
+          //await sendDM(client, discordId, message);
           console.log("DM sent to the user with discordId " + discordId);
       
       }

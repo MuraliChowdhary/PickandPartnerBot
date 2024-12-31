@@ -3,8 +3,8 @@ const mongoose = require("mongoose");
 
 exports.addToListA = async (req, res) => {
   try {
-    const { discordId, newsletterName, niche, subscribers, link ,copyText} = req.body;
-    console.log(req.body)
+    const { discordId, newsletterName, niche, subscribers, link, copyText } = req.body;
+    console.log(req.body);
 
     // Validate input
     if (!discordId || !newsletterName || !niche || !subscribers || !link || !copyText) {
@@ -16,8 +16,14 @@ exports.addToListA = async (req, res) => {
       return res.status(400).json({ message: "Subscribers must be a positive number" });
     }
 
+    // Ensure the link starts with "https://"
+    let processedLink = link.trim();
+    if (!/^https?:\/\//i.test(processedLink)) {
+      processedLink = `https://${processedLink}`;
+    }
+
     const urlPattern = /^(https?:\/\/)?([\w-]+(\.[\w-]+)+)(:[0-9]{1,5})?(\/.*)?$/i;
-    if (!urlPattern.test(link)) {
+    if (!urlPattern.test(processedLink)) {
       return res.status(400).json({ message: "Invalid URL format" });
     }
 
@@ -28,7 +34,7 @@ exports.addToListA = async (req, res) => {
     }
 
     // Check for duplicate link
-    const existingLink = await ListA.findOne({ link });
+    const existingLink = await ListA.findOne({ link: processedLink });
     if (existingLink) {
       return res.status(400).json({ message: "This newsletter link is already registered" });
     }
@@ -38,8 +44,8 @@ exports.addToListA = async (req, res) => {
       newsletterName,
       niche,
       subscribers: subscriberCount,
-      link,
-      copyText:copyText
+      link: processedLink,
+      copyText,
     });
 
     await newEntry.save();

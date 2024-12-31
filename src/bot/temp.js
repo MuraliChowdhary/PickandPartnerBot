@@ -315,9 +315,9 @@ client.on("interactionCreate", async (interaction) => {
       case "talk_to_admin":
         await handleSubmitFeedback(interaction);
         break;
-      case "cross_promote":
-        await handleCrossPromote(interaction);
-        break;
+      // case "cross_promote":
+      //   await handleCrossPromote(interaction);
+      //   break;
       case "guidelines":
         await handleGuidelines(interaction);
         break;

@@ -30,8 +30,9 @@ async function handleRegister(interaction) {
     const filter = (response) => response.author.id === interaction.user.id;
     const collector = interaction.channel.createMessageCollector({
       filter,
-      time: 180000,
+      time: 1200000, // 20 minutes in milliseconds
     });
+    
 
     let newsletterData = { discordId: interaction.user.id };
     const urlPattern = /^(https?:\/\/)?([\w-]+(\.[\w-]+)+)(:[0-9]{1,5})?(\/.*)?$/i;
@@ -95,7 +96,10 @@ async function registerNewsletter(interaction, newsletterData) {
 
     if (response.ok) {
       await interaction.followUp(
-        `Thanks! We are verifying your details.\n\nMeanwhile, check out our resources channel.\n\n`
+        `Thanks! We are verifying your details.\n\n`+
+
+        `Meanwhile, check out our [#resources](https://discord.com/channels/1258797130072457268/1258797130072457272) channel in Discord!\n\n`
+        
       );
 
       const webhookPayload = {
