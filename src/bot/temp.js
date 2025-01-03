@@ -1,6 +1,6 @@
 require("dotenv").config();
 const fetch = (...args) =>
-  import("node-fetch").then(({ default: fetch }) => fetch(...args));
+import("node-fetch").then(({ default: fetch }) => fetch(...args));
 
 const express = require("express");
 const mongoose = require("mongoose");
@@ -13,6 +13,7 @@ const listBRoutes = require("../../Routes/listBRoutes");
 const utmRoutes = require("../../Routes/utmRoutes");
 const AdminRoutes = require("../../Routes/AdminRoutes");
 const WEBHOOK_URL = process.env.USER_NOTIFIER;
+ 
 const { mainDb, secondaryDb } = require("../../Models/db/db");
 
 const { handleRegister } = require("../helpers/registration");
