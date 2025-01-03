@@ -92,16 +92,18 @@ async function handleVerified(interaction) {
           });
       
           const message = {
-            content: `🟢 You are Verified\n\n`+
-          
-          `There are a few magic commands to try:\n\n`+
-          
-          `/cross-promote -  Promote other newsletters and let others promote yours in return!\n\n`+
-          `/talk_to_admin - We are open to discuss anything\n\n`+
-          `/edit_profile\n\n`
+            content: `🟢 You are verified\n\n`+
+
+           `From now on, our team will personally contact you whenever we discover a perfect match for you.\n\n`+
+            
+            `And there are a few more magic commands to try:\n\n` +
+            
+            `/talk_to_admin - we are open to discuss anything.\n\n`+
+            
+            `/edit_profile - if you want to update any details.\n\n`
           };
       
-          //await sendDM(client, discordId, message);
+          await sendDM(client, discordId, message);
           console.log("DM sent to the user with discordId " + discordId);
       
       }

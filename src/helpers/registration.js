@@ -34,7 +34,6 @@ async function handleRegister(interaction) {
       filter,
       time: 1800000, // 20 minutes in milliseconds
     });
-    
 
     let newsletterData = { discordId: interaction.user.id };
     const urlPattern = /^(https?:\/\/)?([\w-]+(\.[\w-]+)+)(:[0-9]{1,5})?(\/.*)?$/i;
@@ -51,18 +50,14 @@ async function handleRegister(interaction) {
       } else if (!newsletterData.subscribers) {
         const subscriberCount = parseInt(userMessage, 10);
         if (isNaN(subscriberCount)) {
-          await interaction.followUp(
-            "Please enter a valid number for subscribers:"
-          );
+          await interaction.followUp("Please enter a valid number for subscribers:");
         } else {
           newsletterData.subscribers = subscriberCount;
           await interaction.followUp("Please provide a link to your newsletter:");
         }
       } else if (!newsletterData.link) {
         if (!urlPattern.test(userMessage)) {
-          await interaction.followUp(
-            "Please provide a valid URL for your newsletter:"
-          );
+          await interaction.followUp("Please provide a valid URL for your newsletter:");
         } else {
           newsletterData.link = userMessage;
           await interaction.followUp("Please provide the copy/promo text for your newsletter:");
@@ -73,19 +68,21 @@ async function handleRegister(interaction) {
 
         // Submit the data
         await registerNewsletter(interaction, newsletterData);
+        //await interaction.followUp("Your newsletter registration has been completed successfully!");
       }
     });
 
-    collector.on("end", async (_, reason) => {
+    collector.on("end", (collected, reason) => {
       if (reason === "time") {
-        await interaction.followUp("Time out! Please use /register to start again.");
+        interaction.followUp("The registration process timed out. Please start again if you'd like to register.");
       }
     });
   } catch (error) {
     console.error("Error in handleRegister:", error);
-    await interaction.followUp("An unexpected error occurred. Please try again later.");
+    await interaction.followUp("An error occurred while processing your request. Please try again later.");
   }
 }
+
 
 // Helper function to register a newsletter
 async function registerNewsletter(interaction, newsletterData) {
