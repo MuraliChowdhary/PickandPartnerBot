@@ -26,17 +26,16 @@ app.use("/api/utm", utmRoutes);
 // handleRegister function
 async function handleRegister(interaction) {
   try {
-    // Defer the reply to allow time for processing
-    await interaction.deferReply();
-
-    await interaction.followUp("Please enter your newsletter name:");
+    // await interaction.deferReply();
+    await interaction.reply("Please enter your newsletter name:");
 
     const filter = (response) => response.author.id === interaction.user.id;
     const collector = interaction.channel.createMessageCollector({
       filter,
-      time: 600000,  
+      time: 1800000, // 20 minutes in milliseconds
     });
     
+
     let newsletterData = { discordId: interaction.user.id };
     const urlPattern = /^(https?:\/\/)?([\w-]+(\.[\w-]+)+)(:[0-9]{1,5})?(\/.*)?$/i;
 
