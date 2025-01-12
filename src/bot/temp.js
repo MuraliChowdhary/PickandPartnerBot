@@ -13,7 +13,7 @@ const listBRoutes = require("../../Routes/listBRoutes");
 const utmRoutes = require("../../Routes/utmRoutes");
 const AdminRoutes = require("../../Routes/AdminRoutes");
 const WEBHOOK_URL = process.env.USER_NOTIFIER;
- 
+
 const { mainDb, secondaryDb } = require("../../Models/db/db");
 
 const { handleRegister } = require("../helpers/registration");
@@ -326,7 +326,7 @@ client.on("interactionCreate", async (interaction) => {
         await handleSendUtmLinks(client, interaction);
         break;
       case "send_message_to_user":
-        await handleSendMessageToUser(interaction);
+        await handleSendMessageToUser(interaction,client);
         break;
       case "verify":
         await handleVerified(interaction);

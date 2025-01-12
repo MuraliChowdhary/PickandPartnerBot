@@ -32,20 +32,17 @@ async function handleSendMessageToUser(interaction, client) {
   const discordId = interaction.options.getString("discord_id"); // Get the Discord ID from options
   const message = interaction.options.getString("message"); // Get the message from options
 
+  console.log(discordId + "  " + message);
+  
   try {
     // Fetch the user by their Discord ID
     const user = await client.users.fetch(discordId);
 
-    // Create a rich embed message
-    const embedMessage = new EmbedBuilder()
-      .setColor(0x00ff00) // Green color for positive feedback
-      .setTitle("📝 **Message from Admin**") // Title of the message
-      .setDescription(message) // The actual content of the message
-      .setFooter({ text: "If you have any questions, feel free to ask!" }) // Footer message
-      .setTimestamp(); // Timestamp to show when the message was sent
+    // Prepare the message with line breaks
+    const formattedMessage = `📝 **Message from Admin**\n\n${message}\n\nIf you have any questions, feel free to ask!`;
 
-    // Send the embed message to the user
-    await user.send({ embeds: [embedMessage] });
+    // Send the message to the user
+    await user.send(formattedMessage);
 
     // Acknowledge the interaction with a success message
     await interaction.reply({
@@ -61,6 +58,7 @@ async function handleSendMessageToUser(interaction, client) {
     });
   }
 }
+
 
 module.exports = {
   handleSendMessageToUser,
