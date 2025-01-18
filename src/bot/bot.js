@@ -1,6 +1,6 @@
 require("dotenv").config();
 const fetch = (...args) =>
-import("node-fetch").then(({ default: fetch }) => fetch(...args));
+  import("node-fetch").then(({ default: fetch }) => fetch(...args));
 
 const express = require("express");
 const mongoose = require("mongoose");
@@ -10,12 +10,12 @@ const cors = require("cors");
 const listARoutes = require("../../Routes/listARoutes");
 // const listBRoutes = require("../../Routes/listBRoutes");
 const utmRoutes = require("../../Routes/utmRoutes");
-const AdminRoutes = require("../../Routes/AdminRoutes")
+const AdminRoutes = require("../../Routes/AdminRoutes");
 // const ADMIN_USER_ID = process.env.ADMIN_USER_ID
-const API  ="http://localhost:3030/api/admin"
-const WEBHOOK_URL = process.env.USER_NOTIFIER
-const REGISTRATION_NOTIFIER = process.env.REGISTRATION_NOTIFIER
- 
+const API = "https://pickandpartnerbot-1.onrender.com/api/admin";
+const WEBHOOK_URL = process.env.USER_NOTIFIER;
+const REGISTRATION_NOTIFIER = process.env.REGISTRATION_NOTIFIER;
+
 // Set up Express app
 const app = express();
 app.use(cors());
@@ -35,7 +35,7 @@ mongoose
   });
 
 // API routes
-app.use("/api/admin",AdminRoutes)
+app.use("/api/admin", AdminRoutes);
 app.use("/api/", listARoutes);
 // app.use("/api/", listBRoutes);
 app.use("/api/utm", utmRoutes);
@@ -44,12 +44,6 @@ app.use("/api/utm", utmRoutes);
 app.listen(3030, () => {
   console.log("Server is running on port 3030");
 });
-
-
-
-
-
-
 
 // ----------------- Discord Bot Section -----------------
 const { REST } = require("@discordjs/rest");
@@ -75,9 +69,6 @@ const client = new Client({
   ],
   partials: [Partials.Message, Partials.Channel, Partials.Reaction],
 });
-
- 
-
 
 const commands = [
   {
@@ -114,44 +105,40 @@ const rest = new REST({ version: "9" }).setToken(
 client.once("ready", () => {
   console.log("Bot is online!");
 });
- 
-client.on('guildCreate', (guild) => {
-    const guildName = guild.name;
-    const guildId = guild.id;
 
-    console.log(`Bot added to a new server: ${guildName} (ID: ${guildId})`);
+client.on("guildCreate", (guild) => {
+  const guildName = guild.name;
+  const guildId = guild.id;
 
-    // Create the message to be sent to the admin
-    const message = `The bot has been added to a new server: **${guildName}** (ID: ${guildId})`;
+  console.log(`Bot added to a new server: ${guildName} (ID: ${guildId})`);
 
-    // Send a POST request to the webhook URL
-    fetch(WEBHOOK_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            content: message // The message you want to send to the Discord channel
-        })
+  // Create the message to be sent to the admin
+  const message = `The bot has been added to a new server: **${guildName}** (ID: ${guildId})`;
+
+  // Send a POST request to the webhook URL
+  fetch(WEBHOOK_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      content: message, // The message you want to send to the Discord channel
+    }),
+  })
+    .then((response) => {
+      // Check if the response is OK
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json(); // Only parse the response if it's OK
     })
-    .then(response => {
-        // Check if the response is OK
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json(); // Only parse the response if it's OK
+    .then((data) => {
+      console.log("Webhook successfully triggered:", data);
     })
-    .then(data => {
-        console.log('Webhook successfully triggered:', data);
-    })
-    .catch(error => {
-        console.error('Error triggering webhook:', error.message); // Log the error message
+    .catch((error) => {
+      console.error("Error triggering webhook:", error.message); // Log the error message
     });
 });
-
-
-
-
 
 client.on("guildCreate", async (guild) => {
   console.log(`Bot added to a new server: ${guild.name}`);
@@ -165,17 +152,15 @@ client.on("guildCreate", async (guild) => {
   if (generalChannel) {
     generalChannel.send(
       `Welcome to the Pick and Partner community,  🎉\n` +
-      `Here, you can connect, collaborate, and cross-promote your newsletter with a diverse group of creators.\n` +
-      `Before you join, please tell us more about yourself so we can find the perfect match for you.\n` +
-      `#guidelines`
+        `Here, you can connect, collaborate, and cross-promote your newsletter with a diverse group of creators.\n` +
+        `Before you join, please tell us more about yourself so we can find the perfect match for you.\n` +
+        `#guidelines`
     );
   } else {
     console.log(`No general channel found in ${guild.name}.`);
   }
 });
 
-
- 
 client.on("interactionCreate", async (interaction) => {
   if (!interaction.isCommand()) return;
 
@@ -230,11 +215,14 @@ async function handleRegister(interaction) {
         newsletterData.link = userMessage;
         collector.stop();
 
-        const response = await fetch("http://localhost:3030/api/register", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(newsletterData),
-        });
+        const response = await fetch(
+          "https://pickandpartnerbot-1.onrender.com/api/register",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(newsletterData),
+          }
+        );
 
         if (response.ok) {
           await interaction.followUp({
@@ -256,12 +244,9 @@ async function handleRegister(interaction) {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              content: `New registration:\n**Discord ID:** ${newsletterData.discordId}\n**Newsletter Name:** ${newsletterData.newsletterName}\n**Niche:** ${newsletterData.niche}\n**Subscribers:** ${newsletterData.subscribers}\n**Link:** ${newsletterData.link}`
-            })
-          })
-
-
-
+              content: `New registration:\n**Discord ID:** ${newsletterData.discordId}\n**Newsletter Name:** ${newsletterData.newsletterName}\n**Niche:** ${newsletterData.niche}\n**Subscribers:** ${newsletterData.subscribers}\n**Link:** ${newsletterData.link}`,
+            }),
+          });
         } else {
           await interaction.followUp(
             "Failed to save your details. Please try again later."
@@ -287,7 +272,7 @@ async function handleEditProfile(interaction) {
 
   async function fetchProfile() {
     const response = await fetch(
-      `http://localhost:3030/api/profile?discordId=${discordId}`,
+      `https://pickandpartnerbot-1.onrender.com/api/profile?discordId=${discordId}`,
       {
         method: "GET",
         headers: { "Content-Type": "application/json" },
@@ -298,11 +283,14 @@ async function handleEditProfile(interaction) {
   }
 
   async function updateProfile(field, value) {
-    const response = await fetch("http://localhost:3030/api/update-profile", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ discordId, [field]: value }),
-    });
+    const response = await fetch(
+      "https://pickandpartnerbot-1.onrender.com/api/update-profile",
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ discordId, [field]: value }),
+      }
+    );
     if (!response.ok) throw new Error("Failed to update profile");
     return await response.json();
   }
@@ -412,7 +400,7 @@ async function handleEditProfile(interaction) {
 // Handle the cross-promote interaction
 async function handleCrossPromote(interaction) {
   try {
-    // const response = await fetch("http://localhost:3030/api/list", {
+    // const response = await fetch("https://pickandpartnerbot-1.onrender.com/api/list", {
     //   method: "GET",
     //   headers: { "Content-Type": "application/json" },
     // });
@@ -480,7 +468,7 @@ async function handleCrossPromote(interaction) {
 // async function handleCollaborate(interaction, creatorId) {
 //   try {
 //     const response = await fetch(
-//       `http://localhost:3030/api/link?creatorId=${creatorId}`,
+//       `https://pickandpartnerbot-1.onrender.com/api/link?creatorId=${creatorId}`,
 //       {
 //         method: "GET",
 //         headers: { "Content-Type": "application/json" },

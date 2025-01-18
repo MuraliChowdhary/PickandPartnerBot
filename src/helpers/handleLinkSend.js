@@ -17,25 +17,24 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
- 
 // API routes
 app.use("/api/admin", AdminRoutes);
 app.use("/api/", listARoutes);
 // app.use("/api/", listBRoutes);
 app.use("/api/utm", utmRoutes);
 
- 
-
- 
 async function handleLinkSend(interaction) {
   try {
     // Send a GET request to the backend to fetch verified users whose links are not generated
-    const response = await fetch("http://localhost:3030/api/linkGenarated", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await fetch(
+      "https://pickandpartnerbot-1.onrender.com/api/linkGenarated",
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     // Check if the response is successful
     if (!response.ok) {
@@ -59,13 +58,13 @@ async function handleLinkSend(interaction) {
   } catch (error) {
     console.error("Error in handleLink:", error);
     await interaction.reply({
-      content: "An error occurred while fetching user data. Please try again later.",
+      content:
+        "An error occurred while fetching user data. Please try again later.",
       ephemeral: true,
     });
   }
 }
 
-
 module.exports = {
-    handleLinkSend
-}
+  handleLinkSend,
+};

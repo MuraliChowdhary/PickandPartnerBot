@@ -30,22 +30,21 @@ async function handleCrossPromote(interaction) {
     // Fetch user verification status
     const discordId = interaction.user.id;
     const response = await fetch(
-      `http://localhost:3030/api/isVerify?discordId=${discordId}`,
+      `https://pickandpartnerbot-1.onrender.com/api/isVerify?discordId=${discordId}`,
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
-        
       }
     );
 
-    const textResponse = await response.json(); 
-    console.log(textResponse) 
+    const textResponse = await response.json();
+    console.log(textResponse);
 
     if (!response.ok) {
-      console.error("Error response:", textResponse.message);   
- 
+      console.error("Error response:", textResponse.message);
+
       await interaction.reply({
         content:
           "Sorry, you are not registered in the cross-promotion program. Please try /register for registration",
@@ -54,25 +53,24 @@ async function handleCrossPromote(interaction) {
       return;
     }
 
-     
-    const  verified = await textResponse.verified;
+    const verified = await textResponse.verified;
 
     if (!verified) {
       await interaction.reply({
         content:
           "Sorry, you don't have access to this feature yet. Try one of the following:\n" +
           "1. Recheck your registration details\n" +
-          "2. Wait for an admin to approve your registration\n\n", 
+          "2. Wait for an admin to approve your registration\n\n",
         ephemeral: true,
       });
       return;
     }
 
     // If verified, proceed to fetch user details
-    await interaction.deferReply();  // Defer the reply to allow followUp
+    await interaction.deferReply(); // Defer the reply to allow followUp
 
     const responseData = await fetch(
-      `http://localhost:3030/api/profile?discordId=${discordId}`,
+      `https://pickandpartnerbot-1.onrender.com/api/profile?discordId=${discordId}`,
       {
         method: "GET",
         headers: {
@@ -99,17 +97,17 @@ async function handleCrossPromote(interaction) {
           .setTitle("🔗 **Cross Promotion Request** 📢")
           .setDescription(
             `**User Details**:\n` +
-            `**Discord ID:** ${discordId}\n` +
-            `**Username:** ${interaction.user.username}\n` +
-            `---\n` +
-            `**Newsletter Info**:\n` +
-            `**Niche:** ${niche}\n` +
-            `**Subscribers:** ${subscribers}\n` +
-            `**Newsletter Name:** ${newsletterName}\n` +
-            `**Link:** [Visit Newsletter](${link})\n` +
-            `**Additional Information:** ${additionalInfo}\n` +
-            `---\n` +
-            `*This request was made at ${new Date().toLocaleString()}*`
+              `**Discord ID:** ${discordId}\n` +
+              `**Username:** ${interaction.user.username}\n` +
+              `---\n` +
+              `**Newsletter Info**:\n` +
+              `**Niche:** ${niche}\n` +
+              `**Subscribers:** ${subscribers}\n` +
+              `**Newsletter Name:** ${newsletterName}\n` +
+              `**Link:** [Visit Newsletter](${link})\n` +
+              `**Additional Information:** ${additionalInfo}\n` +
+              `---\n` +
+              `*This request was made at ${new Date().toLocaleString()}*`
           )
           .setFooter({
             text: "Please review the request and take necessary action.",
@@ -133,9 +131,8 @@ async function handleCrossPromote(interaction) {
 
     // Confirmation message
     await interaction.followUp(
-      "Finding you the best match\n\n"+
-
-      "We will send you the promotion details\n\n"
+      "Finding you the best match\n\n" +
+        "We will send you the promotion details\n\n"
     );
   } catch (error) {
     console.error("Error in handleCrossPromote:", error);
@@ -144,7 +141,5 @@ async function handleCrossPromote(interaction) {
     );
   }
 }
-
-
 
 module.exports = { handleCrossPromote };

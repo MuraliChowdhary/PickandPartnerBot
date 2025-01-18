@@ -11,17 +11,20 @@ const listARoutes = require("../../Routes/listARoutes");
 const utmRoutes = require("../../Routes/utmRoutes");
 const AdminRoutes = require("../../Routes/AdminRoutes");
 const { sendDM } = require("./sendDm");
-const { Client } = require('discord.js');
+const { Client } = require("discord.js");
 
 const CROSSPROMOTION_TRIGGER = process.env.WEBHOOK_URL_CROSSPROMOTION;
-const client = new Client({ intents: ['Guilds', 'GuildMessages', 'DirectMessages'] });
+const client = new Client({
+  intents: ["Guilds", "GuildMessages", "DirectMessages"],
+});
 
 // Log in to Discord
-client.login(process.env.DISCORDJS_BOT_TOKEN)
-    .then(() => {
-        console.log('Bot logged in successfully!');
-    })
-    .catch(console.error);
+client
+  .login(process.env.DISCORDJS_BOT_TOKEN)
+  .then(() => {
+    console.log("Bot logged in successfully!");
+  })
+  .catch(console.error);
 // Set up Express app
 const app = express();
 app.use(cors());
@@ -34,89 +37,91 @@ app.use("/api/", listARoutes);
 app.use("/api/utm", utmRoutes);
 
 async function handleVerified(interaction) {
-    try {
-      const discordId = interaction.options.getString("discord_id");
-      console.log(discordId);
-  
-      // Check if the user is already verified
-      const verifyCheckResponse = await fetch(`http://localhost:3030/api/isVerify?discordId=${discordId}`);
-      
-      if (!verifyCheckResponse.ok) {
-        const errorData = await verifyCheckResponse.json();
-        console.error("Verification check error:", errorData);
-        
-        await interaction.reply({
-          content: `Error: ${errorData.message || "Unable to check the verification status."}`,
-          ephemeral: true,
-        });
-        return;
-      }
-  
-      const verifyCheckData = await verifyCheckResponse.json();
-    
-      if (verifyCheckData.verified) {
-        // If user is already verified, send a message indicating so
-        await interaction.reply({
-          content: `✅ User with Discord ID **${discordId}** is already verified and eligible for cross-promotion!`,
-          ephemeral: true,
-        });
-        return;
-      }
+  try {
+    const discordId = interaction.options.getString("discord_id");
+    console.log(discordId);
 
-      else{
-        const verifyResponse = await fetch("http://localhost:3030/api/verify", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ discordId }),
-          });
-      
-          // Handle non-successful response
-          if (!verifyResponse.ok) {
-            const errorData = await verifyResponse.json();
-            console.error("Verification error:", errorData);
-      
-            await interaction.reply({
-              content: `Error: ${errorData.message || "Unable to verify the user."}`,
-              ephemeral: true,
-            });
-            return;
-          }
-      
-          // Successful verification response
-          const successData = await verifyResponse.json();
-          await interaction.reply({
-            content: `✅ ${successData.message}`,
-            ephemeral: true,
-          });
-      
-          const message = {
-            content: `🟢 You are Verified\n\n`+
-          
-          `There are a few magic commands to try:\n\n`+
-          
-          `/cross-promote -  Promote other newsletters and let others promote yours in return!\n\n`+
-          `/talk_to_admin - We are open to discuss anything\n\n`+
-          `/edit_profile\n\n`
-          };
-      
-          //await sendDM(client, discordId, message);
-          console.log("DM sent to the user with discordId " + discordId);
-      
-      }
-  
-    
-    } catch (error) {
-      console.error("Error in handleVerified:", error);
-  
+    // Check if the user is already verified
+    const verifyCheckResponse = await fetch(
+      `https://pickandpartnerbot-1.onrender.com/api/isVerify?discordId=${discordId}`
+    );
+
+    if (!verifyCheckResponse.ok) {
+      const errorData = await verifyCheckResponse.json();
+      console.error("Verification check error:", errorData);
+
       await interaction.reply({
-        content: "An unexpected error occurred. Please try again later.",
+        content: `Error: ${
+          errorData.message || "Unable to check the verification status."
+        }`,
         ephemeral: true,
       });
+      return;
     }
-  }
 
+    const verifyCheckData = await verifyCheckResponse.json();
+
+    if (verifyCheckData.verified) {
+      // If user is already verified, send a message indicating so
+      await interaction.reply({
+        content: `✅ User with Discord ID **${discordId}** is already verified and eligible for cross-promotion!`,
+        ephemeral: true,
+      });
+      return;
+    } else {
+      const verifyResponse = await fetch(
+        "https://pickandpartnerbot-1.onrender.com/api/verify",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ discordId }),
+        }
+      );
+
+      // Handle non-successful response
+      if (!verifyResponse.ok) {
+        const errorData = await verifyResponse.json();
+        console.error("Verification error:", errorData);
+
+        await interaction.reply({
+          content: `Error: ${
+            errorData.message || "Unable to verify the user."
+          }`,
+          ephemeral: true,
+        });
+        return;
+      }
+
+      // Successful verification response
+      const successData = await verifyResponse.json();
+      await interaction.reply({
+        content: `✅ ${successData.message}`,
+        ephemeral: true,
+      });
+
+      const message = {
+        content:
+          `🟢 You are Verified\n\n` +
+          `There are a few magic commands to try:\n\n` +
+          `/cross-promote -  Promote other newsletters and let others promote yours in return!\n\n` +
+          `/talk_to_admin - We are open to discuss anything\n\n` +
+          `/edit_profile\n\n`,
+      };
+
+      //await sendDM(client, discordId, message);
+      console.log("DM sent to the user with discordId " + discordId);
+    }
+  } catch (error) {
+    console.error("Error in handleVerified:", error);
+
+    await interaction.reply({
+      content: "An unexpected error occurred. Please try again later.",
+      ephemeral: true,
+    });
+  }
+}
 
 module.exports = {
   handleVerified,

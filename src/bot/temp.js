@@ -26,7 +26,11 @@ const { handleLinkSend } = require("../helpers/handleLinkSend");
 const { handleProfile } = require("../helpers/handleProfile");
 const { handleGuidelines } = require("../helpers/guidelines");
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: "*", // Allow all origins (use cautiously in production)
+  methods: ["GET", "POST"], // Limit methods to those you need
+  allowedHeaders: ["Content-Type"], // Allow headers required by your bot
+}));
 app.use(express.json());
 
 // Connect to both databases
@@ -55,7 +59,7 @@ Promise.all([mainDb.asPromise(), secondaryDb.asPromise()])
 // API routes
 app.use("/api/admin", AdminRoutes);
 app.use("/api/", listARoutes);
-app.use("/api/", listBRoutes);
+// app.use("/api/", listBRoutes);
 app.use("/api/utm", utmRoutes);
 
 app.get("/health", (req, res) => {
