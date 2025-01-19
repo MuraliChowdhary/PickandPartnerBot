@@ -30,7 +30,7 @@ async function handleCrossPromote(interaction) {
     // Fetch user verification status
     const discordId = interaction.user.id;
     const response = await fetch(
-      `https://pickandpartnerbot-1.onrender.com/api/isVerify?discordId=${discordId}`,
+      `https://pickandpartnerbackend.onrender.com/api/isVerify?discordId=${discordId}`,
       {
         method: "GET",
         headers: {
@@ -70,7 +70,7 @@ async function handleCrossPromote(interaction) {
     await interaction.deferReply(); // Defer the reply to allow followUp
 
     const responseData = await fetch(
-      `https://pickandpartnerbot-1.onrender.com/api/profile?discordId=${discordId}`,
+      `https://pickandpartnerbackend.onrender.com/api/profile?discordId=${discordId}`,
       {
         method: "GET",
         headers: {

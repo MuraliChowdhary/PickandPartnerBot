@@ -43,7 +43,7 @@ async function handleVerified(interaction) {
 
     // Check if the user is already verified
     const verifyCheckResponse = await fetch(
-      `https://pickandpartnerbot-1.onrender.com/api/isVerify?discordId=${discordId}`
+      `https://pickandpartnerbackend.onrender.com/api/isVerify?discordId=${discordId}`
     );
 
     if (!verifyCheckResponse.ok) {
@@ -70,7 +70,7 @@ async function handleVerified(interaction) {
       return;
     } else {
       const verifyResponse = await fetch(
-        "https://pickandpartnerbot-1.onrender.com/api/verify",
+        "https://pickandpartnerbackend.onrender.com/api/verify",
         {
           method: "POST",
           headers: {

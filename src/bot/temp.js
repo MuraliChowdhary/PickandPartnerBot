@@ -39,13 +39,13 @@ Promise.all([mainDb.asPromise(), secondaryDb.asPromise()])
     console.log("Both databases connected successfully!");
 
     // Initialize the change stream and start monitoring for clicks
-    trackUrlClicks(secondaryDb);
+    //trackUrlClicks(secondaryDb);
 
     // Schedule the daily DM sending task (run every day at midnight)
-    cron.schedule("0 0 * * *", () => {
-      console.log("Sending daily DMs to promotees...");
-      sendDailyDM();
-    });
+    // cron.schedule("0 0 * * *", () => {
+    //   console.log("Sending daily DMs to promotees...");
+    //   sendDailyDM();
+    // });
 
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);

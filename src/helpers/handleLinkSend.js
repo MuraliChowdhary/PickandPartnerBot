@@ -27,7 +27,7 @@ async function handleLinkSend(interaction) {
   try {
     // Send a GET request to the backend to fetch verified users whose links are not generated
     const response = await fetch(
-      "https://pickandpartnerbot-1.onrender.com/api/linkGenarated",
+      "https://pickandpartnerbackend.onrender.com/api/linkGenarated",
       {
         method: "GET",
         headers: {

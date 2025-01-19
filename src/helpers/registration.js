@@ -12,102 +12,123 @@ const utmRoutes = require("../../Routes/utmRoutes");
 const AdminRoutes = require("../../Routes/AdminRoutes");
 
 const REGISTRATION_NOTIFIER = process.env.REGISTRATION_NOTIFIER;
- 
+console.log(REGISTRATION_NOTIFIER);
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// API routes
 app.use("/api/admin", AdminRoutes);
 app.use("/api/", listARoutes);
 app.use("/api/utm", utmRoutes);
 
-// handleRegister function
 async function handleRegister(interaction) {
   try {
-     
-    await interaction.reply("Please enter your newsletter name:");
+    await interaction.reply({
+      content: "Please enter your newsletter name:",
+      ephemeral: true,
+    });
 
     const filter = (response) => response.author.id === interaction.user.id;
     const collector = interaction.channel.createMessageCollector({
       filter,
-      time: 600000,  
+      time: 600000,
     });
-    
 
-    let newsletterData = { discordId: interaction.user.id };
-    const urlPattern = /^(https?:\/\/)?([\w-]+(\.[\w-]+)+)(:[0-9]{1,5})?(\/.*)?$/i;
+    const newsletterData = { discordId: interaction.user.id };
+    const urlPattern =
+      /^(https?:\/\/)?([\w-]+(\.[\w-]+)+)(:[0-9]{1,5})?(\/.*)?$/i;
 
     collector.on("collect", async (collected) => {
       const userMessage = collected.content;
 
       if (!newsletterData.newsletterName) {
         newsletterData.newsletterName = userMessage;
-        await interaction.followUp("Please enter your niche:");
+        await interaction.followUp({
+          content: "Please enter your niche:",
+          ephemeral: true,
+        });
       } else if (!newsletterData.niche) {
         newsletterData.niche = userMessage;
-        await interaction.followUp("Please enter your number of subscribers:");
+        await interaction.followUp({
+          content: "Please enter your number of subscribers:",
+          ephemeral: true,
+        });
       } else if (!newsletterData.subscribers) {
         const subscriberCount = parseInt(userMessage, 10);
         if (isNaN(subscriberCount)) {
-          await interaction.followUp(
-            "Please enter a valid number for subscribers:"
-          );
+          await interaction.followUp({
+            content: "Please enter a valid number for subscribers:",
+            ephemeral: true,
+          });
         } else {
           newsletterData.subscribers = subscriberCount;
-          await interaction.followUp("Please provide a link to your newsletter:");
+          await interaction.followUp({
+            content: "Please provide a link to your newsletter:",
+            ephemeral: true,
+          });
         }
       } else if (!newsletterData.link) {
         if (!urlPattern.test(userMessage)) {
-          await interaction.followUp(
-            "Please provide a valid URL for your newsletter:"
-          );
+          await interaction.followUp({
+            content: "Please provide a valid URL for your newsletter:",
+            ephemeral: true,
+          });
         } else {
           newsletterData.link = userMessage;
-          await interaction.followUp("Please provide the copy/promo text for your newsletter:");
+          await interaction.followUp({
+            content: "Please provide the copy/promo text for your newsletter:",
+            ephemeral: true,
+          });
         }
       } else if (!newsletterData.copyText) {
         newsletterData.copyText = userMessage;
         collector.stop();
-
-        // Submit the data
         await registerNewsletter(interaction, newsletterData);
-        
       }
     });
 
     collector.on("end", async (_, reason) => {
       if (reason === "time") {
-        await interaction.followUp("Time out! Please use /register to start again.");
+        await interaction.followUp({
+          content: "Time out! Please use /register to start again.",
+          ephemeral: true,
+        });
       }
     });
   } catch (error) {
     console.error("Error in handleRegister:", error);
-    await interaction.followUp("An unexpected error occurred. Please try again later.");
+    if (!interaction.replied) {
+      await interaction.followUp({
+        content: "An unexpected error occurred. Please try again later.",
+        ephemeral: true,
+      });
+    }
   }
 }
 
-// Helper function to register a newsletter
 async function registerNewsletter(interaction, newsletterData) {
   try {
-    const response = await fetch("https://pickandpartnerbot-1.onrender.com/api/register", {   // https://pickandpartnerbot-1.onrender.com
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(newsletterData),
-    });
+    const response = await fetch(
+      "https://pickandpartnerbackend.onrender.com/api/register",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newsletterData),
+      }
+    );
 
     if (response.ok) {
-      await interaction.followUp(
-        `Thanks! We are verifying your details.\n\n`+
-
-        `Meanwhile, check out our [#resources](https://discord.com/channels/1258797130072457268/1258797130072457272) channel in Discord!\n\n`
-        
-      );
+      await interaction.followUp({
+        content:
+          "Thanks! We are verifying your details.\n\n" +
+          "Meanwhile, check out our [#resources](https://discord.com/channels/1258797130072457268/1258797130072457272) channel!",
+        ephemeral: true,
+      });
 
       const webhookPayload = {
         embeds: [
           {
-            color: 0x00ff00, // Green color
+            color: 0x00ff00,
             title: "📋 Registration Notifier",
             description: "Details of the new registration:",
             fields: [
@@ -121,20 +142,14 @@ async function registerNewsletter(interaction, newsletterData) {
               },
               {
                 name: "Ad Copy",
-                value: newsletterData.copyText
-                  ? `- **Content:** ${newsletterData.copyText}`
-                  : "- **Content:** Not provided",
+                value: newsletterData.copyText || "Not provided",
               },
             ],
-            footer: {
-              text: "Notifier Bot",
-            },
+            footer: { text: "Notifier Bot" },
             timestamp: new Date().toISOString(),
           },
         ],
       };
-      
-      console.log(webhookPayload)
 
       await fetch(REGISTRATION_NOTIFIER, {
         method: "POST",
@@ -143,20 +158,24 @@ async function registerNewsletter(interaction, newsletterData) {
       });
     } else {
       const errorData = await response.json();
-      await interaction.followUp(
-        `Error: ${
+      await interaction.followUp({
+        content: `Error: ${
           errorData.message ||
           "Failed to save your details. Please try again later."
-        }`
-      );
+        }`,
+        ephemeral: true,
+      });
     }
   } catch (error) {
     console.error("Error in registerNewsletter:", error);
-    await interaction.followUp(
-      "An unexpected error occurred while saving your details. Please try again later."
-    );
+    if (!interaction.replied) {
+      await interaction.followUp({
+        content:
+          "An unexpected error occurred while saving your details. Please try again later.",
+        ephemeral: true,
+      });
+    }
   }
 }
 
-// Export the handleRegister function
 module.exports = { handleRegister };

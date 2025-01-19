@@ -43,7 +43,7 @@ async function handleEditProfile(interaction) {
   // Function to fetch profile
   async function fetchProfile() {
     const response = await fetch(
-      `https://pickandpartnerbot-1.onrender.com/api/profile?discordId=${discordId}`,
+      `https://pickandpartnerbackend.onrender.com/api/profile?discordId=${discordId}`,
       {
         method: "GET",
         headers: { "Content-Type": "application/json" },
@@ -56,7 +56,7 @@ async function handleEditProfile(interaction) {
   // Function to update profile
   async function updateProfile(field, value) {
     const response = await fetch(
-      "https://pickandpartnerbot-1.onrender.com/api/update-profile",
+      "https://pickandpartnerbackend.onrender.com/api/update-profile",
       {
         method: "PUT",
         headers: { "Content-Type": "application/json" },

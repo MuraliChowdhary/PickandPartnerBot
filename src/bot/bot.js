@@ -12,7 +12,7 @@ const listARoutes = require("../../Routes/listARoutes");
 const utmRoutes = require("../../Routes/utmRoutes");
 const AdminRoutes = require("../../Routes/AdminRoutes");
 // const ADMIN_USER_ID = process.env.ADMIN_USER_ID
-const API = "https://pickandpartnerbot-1.onrender.com/api/admin";
+const API = "https://pickandpartnerbackend.onrender.com/api/admin";
 const WEBHOOK_URL = process.env.USER_NOTIFIER;
 const REGISTRATION_NOTIFIER = process.env.REGISTRATION_NOTIFIER;
 
@@ -215,14 +215,11 @@ async function handleRegister(interaction) {
         newsletterData.link = userMessage;
         collector.stop();
 
-        const response = await fetch(
-          "https://pickandpartnerbot-1.onrender.com/api/register",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(newsletterData),
-          }
-        );
+        const response = await fetch("https://pickandpartnerbackend.onrender.com/api/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(newsletterData),
+        });
 
         if (response.ok) {
           await interaction.followUp({
@@ -272,7 +269,7 @@ async function handleEditProfile(interaction) {
 
   async function fetchProfile() {
     const response = await fetch(
-      `https://pickandpartnerbot-1.onrender.com/api/profile?discordId=${discordId}`,
+      `https://pickandpartnerbackend.onrender.com/api/profile?discordId=${discordId}`,
       {
         method: "GET",
         headers: { "Content-Type": "application/json" },
@@ -283,14 +280,11 @@ async function handleEditProfile(interaction) {
   }
 
   async function updateProfile(field, value) {
-    const response = await fetch(
-      "https://pickandpartnerbot-1.onrender.com/api/update-profile",
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ discordId, [field]: value }),
-      }
-    );
+    const response = await fetch("https://pickandpartnerbackend.onrender.com/api/update-profile", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ discordId, [field]: value }),
+    });
     if (!response.ok) throw new Error("Failed to update profile");
     return await response.json();
   }
@@ -400,7 +394,7 @@ async function handleEditProfile(interaction) {
 // Handle the cross-promote interaction
 async function handleCrossPromote(interaction) {
   try {
-    // const response = await fetch("https://pickandpartnerbot-1.onrender.com/api/list", {
+    // const response = await fetch("https://pickandpartnerbackend.onrender.com/api/list", {
     //   method: "GET",
     //   headers: { "Content-Type": "application/json" },
     // });
@@ -468,7 +462,7 @@ async function handleCrossPromote(interaction) {
 // async function handleCollaborate(interaction, creatorId) {
 //   try {
 //     const response = await fetch(
-//       `https://pickandpartnerbot-1.onrender.com/api/link?creatorId=${creatorId}`,
+//       `https://pickandpartnerbackend.onrender.com/api/link?creatorId=${creatorId}`,
 //       {
 //         method: "GET",
 //         headers: { "Content-Type": "application/json" },

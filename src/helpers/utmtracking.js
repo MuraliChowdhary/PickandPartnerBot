@@ -38,7 +38,7 @@ function delay(ms) {
 async function isUserVerified(discordId) {
   try {
     const response = await fetch(
-      `https://pickandpartnerbot-1.onrender.com/api/isVerify?discordId=${discordId}`
+      `https://pickandpartnerbackend.onrender.com/api/isVerify?discordId=${discordId}`
     );
     if (!response.ok) {
       throw new Error("Failed to check verification status");
@@ -52,7 +52,7 @@ async function isUserVerified(discordId) {
 }
 
 async function fetchAdCopy(discordId1, discordId2) {
-  const url = `https://pickandpartnerbot-1.onrender.com/api/copyAD?discordId1=${discordId1}&discordId2=${discordId2}`;
+  const url = `https://pickandpartnerbackend.onrender.com/api/copyAD?discordId1=${discordId1}&discordId2=${discordId2}`;
 
   try {
     const response = await fetch(url, {
@@ -216,7 +216,7 @@ async function handleSendUtmLinks(client, interaction) {
     await interaction.editReply(statusMessage);
 
     const response = await fetch(
-      "https://pickandpartnerbot-1.onrender.com/api/linkverify",
+      "https://pickandpartnerbackend.onrender.com/api/linkverify",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
