@@ -56,10 +56,14 @@ async function handleRegister(interaction) {
       } else if (!newsletterData.subscribers) {
         const subscriberCount = parseInt(userMessage, 10);
         if (isNaN(subscriberCount)) {
+
           await interaction.followUp({
             content: "Please enter a valid number for subscribers:",
             ephemeral: true,
           });
+
+          await interaction.followUp("Please enter a valid number for subscribers:");
+
         } else {
           newsletterData.subscribers = subscriberCount;
           await interaction.followUp({
@@ -69,10 +73,14 @@ async function handleRegister(interaction) {
         }
       } else if (!newsletterData.link) {
         if (!urlPattern.test(userMessage)) {
+
           await interaction.followUp({
             content: "Please provide a valid URL for your newsletter:",
             ephemeral: true,
           });
+
+          await interaction.followUp("Please provide a valid URL for your newsletter:");
+
         } else {
           newsletterData.link = userMessage;
           await interaction.followUp({
@@ -84,19 +92,25 @@ async function handleRegister(interaction) {
         newsletterData.copyText = userMessage;
         collector.stop();
         await registerNewsletter(interaction, newsletterData);
+        //await interaction.followUp("Your newsletter registration has been completed successfully!");
       }
     });
 
-    collector.on("end", async (_, reason) => {
+    collector.on("end", (collected, reason) => {
       if (reason === "time") {
+
         await interaction.followUp({
           content: "Time out! Please use /register to start again.",
           ephemeral: true,
         });
+
+        interaction.followUp("The registration process timed out. Please start again if you'd like to register.");
+
       }
     });
   } catch (error) {
     console.error("Error in handleRegister:", error);
+
     if (!interaction.replied) {
       await interaction.followUp({
         content: "An unexpected error occurred. Please try again later.",
@@ -105,6 +119,13 @@ async function handleRegister(interaction) {
     }
   }
 }
+
+    await interaction.followUp("An error occurred while processing your request. Please try again later.");
+  }
+}
+
+
+// Helper function to register a newsletter
 
 async function registerNewsletter(interaction, newsletterData) {
   try {
