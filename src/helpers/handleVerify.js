@@ -39,7 +39,7 @@ async function handleVerified(interaction) {
       console.log(discordId);
   
       // Check if the user is already verified
-      const verifyCheckResponse = await fetch(`http://localhost:3030/api/isVerify?discordId=${discordId}`);
+      const verifyCheckResponse = await fetch(`https://pickandpartnerbackend.onrender.com/api/isVerify?discordId=${discordId}`);
       
       if (!verifyCheckResponse.ok) {
         const errorData = await verifyCheckResponse.json();
@@ -64,7 +64,7 @@ async function handleVerified(interaction) {
       }
 
       else{
-        const verifyResponse = await fetch("http://localhost:3030/api/verify", {
+        const verifyResponse = await fetch("https://pickandpartnerbackend.onrender.com/api/verify", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
