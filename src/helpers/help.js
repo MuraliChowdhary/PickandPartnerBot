@@ -75,9 +75,7 @@ async function handleHelp(interaction) {
     iconURL: "https://cdn-icons-png.flaticon.com/512/888/888879.png", // Optional footer icon
   });
 
-  if (interaction.replied || interaction.deferred) {
-    await interaction.editReply({ embeds: [helpMessage] });
-  } else {
-    await interaction.reply({ embeds: [helpMessage] });
-  }
+  await interaction.reply({ embeds: [helpMessage] });
 }
+
+module.exports = { handleHelp };

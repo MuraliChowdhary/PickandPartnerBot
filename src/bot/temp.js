@@ -325,7 +325,7 @@ client.on("interactionCreate", async (interaction) => {
         await handleSendUtmLinks(client, interaction);
         break;
       case "send_message_to_user":
-        await handleSendMessageToUser(interaction);
+        await handleSendMessageToUser(interaction,client);
         break;
       case "verify":
         await handleVerified(interaction);
