@@ -38,7 +38,7 @@ const fetch = (...args) =>
   async function isUserVerified(discordId) {
     try {
       const response = await fetch(
-        `http://localhost:3030/api/isVerify?discordId=${discordId}`
+        `https://pickandpartnerbackend.onrender.com/api/isVerify?discordId=${discordId}`
       );
       if (!response.ok) {
         throw new Error("Failed to check verification status");
@@ -52,7 +52,7 @@ const fetch = (...args) =>
   }
   
   async function fetchAdCopy(discordId1, discordId2) {
-    const url = `http://localhost:3030/api/copyAD?discordId1=${discordId1}&discordId2=${discordId2}`;
+    const url = `https://pickandpartnerbackend.onrender.com/api/copyAD?discordId1=${discordId1}&discordId2=${discordId2}`;
   
     try {
       const response = await fetch(url, {
@@ -213,7 +213,7 @@ const fetch = (...args) =>
       statusMessage += "Verifying links...\n";
       await interaction.editReply(statusMessage);
   
-      const response = await fetch("http://localhost:3030/api/linkverify", {
+      const response = await fetch("https://pickandpartnerbackend.onrender.com/api/linkverify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ discordId1, discordId2 }),
