@@ -34,9 +34,14 @@ async function handleProfile(interaction) {
 
   try {
     // Fetch user data from the database
-    const user = await ListA.findOne({ discordId });
+    const response = await fetch(`https://pickandpartnerbackend-titu.onrender.com/api/profile?discordId=${discordId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-    if (!user) {
+    if (!response) {
       return interaction.reply({ content: "User not found", ephemeral: true });
     }
 

@@ -46,21 +46,31 @@ async function handleRegister(interaction) {
           await interaction.followUp("Please enter your niche:");
         } else if (!newsletterData.niche) {
           newsletterData.niche = userMessage;
-          await interaction.followUp("Please enter your number of subscribers:");
+          await interaction.followUp(
+            "Please enter your number of subscribers:"
+          );
         } else if (!newsletterData.subscribers) {
           const subscriberCount = parseInt(userMessage, 10);
           if (isNaN(subscriberCount)) {
-            await interaction.followUp("Please enter a valid number for subscribers:");
+            await interaction.followUp(
+              "Please enter a valid number for subscribers:"
+            );
           } else {
             newsletterData.subscribers = subscriberCount;
-            await interaction.followUp("Please provide a link to your newsletter:");
+            await interaction.followUp(
+              "Please provide a link to your newsletter:"
+            );
           }
         } else if (!newsletterData.link) {
           if (!urlPattern.test(userMessage)) {
-            await interaction.followUp("Please provide a valid URL for your newsletter:");
+            await interaction.followUp(
+              "Please provide a valid URL for your newsletter:"
+            );
           } else {
             newsletterData.link = userMessage;
-            await interaction.followUp("Please provide the copy/promo text for your newsletter:");
+            await interaction.followUp(
+              "Please provide the copy/promo text for your newsletter:"
+            );
           }
         } else if (!newsletterData.copyText) {
           newsletterData.copyText = userMessage;
@@ -95,8 +105,15 @@ async function handleRegister(interaction) {
 
 async function registerNewsletter(interaction, newsletterData) {
   try {
+    // Acknowledge the interaction and inform the user about the ongoing process
+    //await interaction.deferReply({ ephemeral: true });
+    await interaction.followUp({
+      content: "Please wait, we are saving your details...",
+    });
+
+    // Send data to the backend
     const response = await fetch(
-      "https://pickandpartnerbackend.onrender.com/api/register",
+      "https://pickandpartnerbackend-titu.onrender.com/api/register",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -105,13 +122,14 @@ async function registerNewsletter(interaction, newsletterData) {
     );
 
     if (response.ok) {
+      // Notify the user of successful registration
       await interaction.followUp({
         content:
           "Thanks! We are verifying your details.\n\n" +
           "Meanwhile, check out our [#resources](https://discord.com/channels/1258797130072457268/1258797130072457272) channel!",
-        ephemeral: true,
       });
 
+      // Send a webhook notification
       const webhookPayload = {
         embeds: [
           {
@@ -144,25 +162,26 @@ async function registerNewsletter(interaction, newsletterData) {
         body: JSON.stringify(webhookPayload),
       });
     } else {
+      // Handle error from the backend
       const errorData = await response.json();
       await interaction.followUp({
         content: `Error: ${
           errorData.message ||
           "Failed to save your details. Please try again later."
         }`,
-        ephemeral: true,
       });
     }
   } catch (error) {
     console.error("Error in registerNewsletter:", error);
+    // Handle unexpected errors
     if (!interaction.replied) {
       await interaction.followUp({
         content:
           "An unexpected error occurred while saving your details. Please try again later.",
-        ephemeral: true,
       });
     }
   }
 }
+
 
 module.exports = { handleRegister };

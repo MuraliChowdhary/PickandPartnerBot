@@ -39,7 +39,7 @@
 //       console.log(discordId);
   
 //       // Check if the user is already verified
-//       const verifyCheckResponse = await fetch(`https://pickandpartnerbackend.onrender.com/api/isVerify?discordId=${discordId}`);
+//       const verifyCheckResponse = await fetch(`https://pickandpartnerbackend-titu.onrender.com/api/isVerify?discordId=${discordId}`);
       
 //       if (!verifyCheckResponse.ok) {
 //         const errorData = await verifyCheckResponse.json();
@@ -64,7 +64,7 @@
 //       }
 
 //       else{
-//         const verifyResponse = await fetch("https://pickandpartnerbackend.onrender.com/api/verify", {
+//         const verifyResponse = await fetch("https://pickandpartnerbackend-titu.onrender.com/api/verify", {
 //             method: "POST",
 //             headers: {
 //               "Content-Type": "application/json",
@@ -171,7 +171,7 @@ async function handleVerified(interaction) {
 
     // Check if the user is already verified
     const verifyCheckResponse = await fetch(
-      `https://pickandpartnerbackend.onrender.com/api/isVerify?discordId=${discordId}`
+      `https://pickandpartnerbackend-titu.onrender.com/api/isVerify?discordId=${discordId}`
     );
 
     if (!verifyCheckResponse.ok) {
@@ -198,7 +198,7 @@ async function handleVerified(interaction) {
       return;
     } else {
       const verifyResponse = await fetch(
-        "https://pickandpartnerbackend.onrender.com/api/verify",
+        "https://pickandpartnerbackend-titu.onrender.com/api/verify",
         {
           method: "POST",
           headers: {

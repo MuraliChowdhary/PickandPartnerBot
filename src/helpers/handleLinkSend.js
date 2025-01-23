@@ -30,7 +30,7 @@ app.use("/api/utm", utmRoutes);
 async function handleLinkSend(interaction) {
   try {
     // Send a GET request to the backend to fetch verified users whose links are not generated
-    const response = await fetch("http://localhost:3030/api/linkGenarated", {
+    const response = await fetch("https://pickandpartnerbackend-titu.onrender.com/api/linkGenarated", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
