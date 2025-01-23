@@ -571,8 +571,10 @@ client.on("guildMemberAdd", async (member) => {
     console.log("User notification trigger sent");
 
     await member.send(
-      `Welcome! Type /register to get started.`
-    );
+            `Glad to have you here\n\n` +
+              `We want to know more about you...  - to match you with the best creators\n` +
+              `Type  /register\n`
+          );
     console.log("DM sent successfully!");
   } catch (error) {
     console.error("Error during guildMemberAdd event:", error.message);
