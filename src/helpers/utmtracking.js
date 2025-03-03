@@ -141,7 +141,7 @@ async function handleSendUtmLinks(client, interaction) {
 
     async function getShortUrl(link) {
       try {
-        const response = await fetch(
+        const response = await fetch(                                       //https://pickandpartner-8nes.onrender.com/aprt
           "https://pickandpartner-8nes.onrender.com/shorten",
           {
             method: "POST",

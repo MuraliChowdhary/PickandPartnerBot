@@ -619,7 +619,7 @@ client.on("interactionCreate", async (interaction) => {
     }
 
     switch (commandName) {
-      case "register":
+      case "register":    
         //await interaction.deferReply();
         await handleRegister(interaction);
         break;
